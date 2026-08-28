@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLI 排课计算器</title>
+<style>
+  :root{
+    --a0:#8257C4; --zj:#2FA07A; --wj:#3B9AD9; --exam:#E0901C; --bilan:#9B2D5E;
+    --brand:#1FA0BE; --brand2:#4BAE7E;
+    --ink:#1c2a35; --muted:#5f7183; --line:#e5ebf1; --bg:#f4f7f9; --card:#ffffff;
+    --soft:#eef3f7; --danger:#d24b4b;
+    --radius:12px; --shadow:0 1px 2px rgba(20,40,60,.06),0 6px 20px rgba(20,40,60,.06);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.55; font-size:15px;}
+  .wrap{max-width:1160px; margin:0 auto; padding:22px 20px 90px}
+  header.top{display:flex; align-items:center; gap:16px; margin-bottom:4px}
+  header.top img{height:46px; width:auto; display:block}
+  header.top .ti{border-left:1px solid var(--line); padding-left:16px}
+  h1{font-size:20px; letter-spacing:-.3px; margin:0; font-weight:800}
+  .sub{color:var(--muted); font-size:13px; margin:2px 0 20px}
+
+  /* main tabs */
+  .maintabs{display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid var(--line)}
+  .maintabs button{border:0; background:transparent; padding:11px 4px; margin-right:22px; font:inherit; font-size:15px; font-weight:700; color:var(--muted); cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px}
+  .maintabs button.on{color:var(--ink); border-bottom-color:var(--brand)}
+
+  .grid{display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow)}
+  .panel .pad{padding:16px}
+  .panel h2{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 12px; font-weight:700}
+  .block+.block{margin-top:18px; padding-top:18px; border-top:1px solid var(--line)}
+
+  label.field{display:block; font-size:13px; font-weight:600; margin-bottom:6px}
+  input[type=date], input[type=text], select{width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:9px; font:inherit; color:var(--ink); background:#fff; -webkit-appearance:none;}
+  input:focus, select:focus{outline:2px solid var(--brand); outline-offset:1px; border-color:transparent}
+
+  .seg{display:flex; background:var(--soft); border-radius:10px; padding:4px; gap:4px}
+  .seg button{flex:1; border:0; background:transparent; padding:9px 8px; border-radius:7px; font:inherit; font-weight:700; color:var(--muted); cursor:pointer}
+  .seg button.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+  /* class list */
+  .clslist{display:flex; flex-direction:column; gap:7px}
+  .clsitem{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer; background:#fff}
+  .clsitem.on{border-color:var(--brand); box-shadow:0 0 0 2px rgba(31,160,190,.14)}
+  .clsitem .nm{font-weight:700; font-size:14px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .clsitem .mt{font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:var(--soft); color:var(--muted); flex:none}
+  .clsitem .st{font-size:11px; color:var(--muted); flex:none; font-variant-numeric:tabular-nums}
+  .clsitem .del{color:var(--danger); font-weight:800; cursor:pointer; padding:0 2px; opacity:.65}
+  .clsitem .del:hover{opacity:1}
+
+  .teacher-row{margin-bottom:13px}
+  .teacher-row .thead{display:flex; align-items:center; gap:8px; margin-bottom:7px}
+  .dot{width:10px; height:10px; border-radius:3px; flex:none}
+  .tname{font-size:13px; font-weight:700}
+  .days{display:flex; flex-wrap:wrap; gap:5px}
+  .day{--c:var(--brand); min-width:34px; text-align:center; padding:6px 4px; border:1px solid var(--line); border-radius:8px; font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer; user-select:none; background:#fff;}
+  .day.on{background:var(--c); border-color:var(--c); color:#fff}
+  .perday{display:flex; align-items:center; gap:8px; margin-top:9px; font-size:12.5px; color:var(--muted)}
+  .perday select{width:64px; padding:5px 8px}
+
+  .hol-list{display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; padding-right:4px}
+  .hol{display:flex; align-items:center; gap:10px; padding:7px 9px; border:1px solid var(--line); border-radius:9px; font-size:13px; cursor:pointer; background:#fff}
+  .hol .hdate{font-variant-numeric:tabular-nums; font-weight:700; flex:none; width:78px}
+  .hol .hname{color:var(--muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .hol .chk{width:17px;height:17px;border-radius:5px;border:1.5px solid #cbd5e1;flex:none;display:grid;place-items:center;color:#fff;font-size:11px}
+  .hol.on{border-color:var(--brand)} .hol.on .chk{background:var(--brand); border-color:var(--brand)}
+  .yeartabs{display:flex; gap:6px; margin-bottom:10px}
+  .yeartabs button{flex:1; border:1px solid var(--line); background:#fff; border-radius:8px; padding:6px; font:inherit; font-weight:700; font-size:13px; color:var(--muted); cursor:pointer}
+  .yeartabs button.on{background:var(--brand); border-color:var(--brand); color:#fff}
+
+  .leave-add{margin-top:6px}
+  .leave-add .row1{display:grid; grid-template-columns:1fr 96px; gap:8px; margin-bottom:8px}
+  .btn{border:0; border-radius:9px; padding:9px 14px; font:inherit; font-weight:700; cursor:pointer; background:var(--brand); color:#fff}
+  .btn.ghost{background:var(--soft); color:var(--ink)}
+  .btn.sm{padding:7px 11px; font-size:13px}
+  .btn.block{width:100%; padding:12px; font-size:15px}
+  .btn:active{transform:translateY(1px)}
+  .leave-item{display:flex; align-items:center; gap:8px; font-size:12.5px; padding:6px 0; border-bottom:1px dashed var(--line)}
+  .leave-item .x{margin-left:auto; color:var(--danger); cursor:pointer; font-weight:800; padding:0 4px}
+  .scopepill{font-size:11px; font-weight:700; padding:1px 7px; border-radius:20px; background:var(--soft); color:var(--muted)}
+
+  .editor-head{display:flex; align-items:center; gap:12px; margin-bottom:16px}
+  .editor-head input{font-size:16px; font-weight:700}
+
+  /* results */
+  .empty{color:var(--muted); text-align:center; padding:54px 20px; font-size:14px}
+  .summary{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px}
+  @media(max-width:560px){.summary{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px}
+  .stat .k{font-size:12px; color:var(--muted); font-weight:600}
+  .stat .v{font-size:18px; font-weight:800; margin-top:3px; font-variant-numeric:tabular-nums}
+
+  .exam-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:18px}
+  .ecard{border-radius:10px; padding:13px 15px; color:#fff}
+  .ecard .lbl{font-size:12px; font-weight:700; opacity:.9}
+  .ecard .d{font-size:18px; font-weight:800; margin-top:4px; font-variant-numeric:tabular-nums}
+  .ecard .w{font-size:12px; opacity:.9; margin-top:1px}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:18px}
+  .card .chead{display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--line); gap:12px; flex-wrap:wrap}
+  .card .chead h3{margin:0; font-size:14px; font-weight:800}
+  .viewtabs{display:flex; gap:4px; background:var(--soft); border-radius:8px; padding:3px}
+  .viewtabs button{border:0; background:transparent; padding:5px 12px; border-radius:6px; font:inherit; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer}
+  .viewtabs button.on{background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.1)}
+
+  .chips{padding:16px; display:flex; flex-wrap:wrap; gap:6px}
+  .chip{display:inline-flex; flex-direction:column; align-items:center; min-width:46px; border-radius:8px; padding:6px; color:#fff; font-size:12px}
+  .chip .cn{font-weight:800; font-size:13px; line-height:1.1}
+  .chip .cd{font-size:10px; opacity:.92; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap}
+  .chip.sep{background:transparent; color:var(--muted); min-width:14px; justify-content:center; font-weight:800}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px}
+  th,td{text-align:left; padding:9px 13px; border-bottom:1px solid var(--line); white-space:nowrap}
+  th{font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:700; background:var(--card); position:sticky; top:0}
+  td.n{font-variant-numeric:tabular-nums}
+  tr.exam td{background:#fff7ec} tr.bilan td{background:#fbeef3}
+  .tag{display:inline-flex; align-items:center; gap:6px; font-weight:700}
+  .tag .sw{width:9px; height:9px; border-radius:3px; flex:none}
+  .badge{font-size:11px; font-weight:800; padding:2px 8px; border-radius:20px; color:#fff}
+  .tblwrap{max-height:520px; overflow:auto}
+
+  .cal{padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:16px}
+  .month h4{margin:0 0 8px; font-size:13px; font-weight:800}
+  .mgrid{display:grid; grid-template-columns:repeat(7,1fr); gap:3px}
+  .mgrid .wd{font-size:10px; color:var(--muted); text-align:center; font-weight:700; padding-bottom:2px}
+  .cell{aspect-ratio:1; border-radius:7px; border:1px solid transparent; display:flex; flex-direction:column; align-items:center; padding-top:3px; font-size:11px}
+  .cell .dd{color:var(--muted); font-variant-numeric:tabular-nums}
+  .cell.hol{background:#fbecec} .cell.hol .dd{color:var(--danger)}
+  .cell.has{border-color:var(--line); background:#fff}
+  .cell .cdots{display:flex; gap:2px; margin-top:2px; flex-wrap:wrap; justify-content:center}
+  .cdot{width:6px; height:6px; border-radius:50%}
+  .cell.exam{box-shadow:0 0 0 2px var(--exam) inset} .cell.bil{box-shadow:0 0 0 2px var(--bilan) inset}
+
+  .legend{display:flex; flex-wrap:wrap; gap:14px; padding:13px 16px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted)}
+  .legend .li{display:flex; align-items:center; gap:6px}
+  .legend .sw{width:11px; height:11px; border-radius:3px}
+
+  .ov-head{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+  .ov-head .acts{display:flex; gap:8px; flex-wrap:wrap}
+  .ov-table td.mid{color:var(--exam); font-weight:700} .ov-table td.fin{color:var(--exam); font-weight:700}
+  .ov-table td.bil{color:var(--bilan); font-weight:700}
+  .ov-table td.err{color:var(--danger)}
+  .ov-table tbody tr:hover td{background:#f8fbfc}
+  .toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:#fff; padding:11px 18px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:50}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  .note{font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5}
+
+  @media print{
+    body{background:#fff}
+    .maintabs,.no-print,aside{display:none!important}
+    .wrap{max-width:none;padding:0}
+    .card{box-shadow:none;border-color:#ccc}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img src="data:image/jpeg;base64,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" alt="MLI">
+    <div class="ti"><h1>排课计算器</h1></div>
+  </header>
+  <p class="sub">按班级把 A0 语音 3 堂 + A1 阶段共 29 堂铺进真实日历，自动跳过法定假日与请假日；教务可管理多个班级，最后在「汇总总览」一次导出所有班的考试与结课日期。</p>
+
+  <div class="maintabs">
+    <button data-tab="setup" class="on">班级设置</button>
+    <button data-tab="overview">汇总总览</button>
+  </div>
+
+  <!-- ===================== 班级设置 ===================== -->
+  <div id="tab-setup">
+    <div class="grid">
+      <aside>
+        <div class="panel"><div class="pad">
+          <div class="block" style="border:0;padding:0;margin:0">
+            <h2>班级列表</h2>
+            <div class="clslist" id="clsList"></div>
+            <button class="btn ghost block sm" id="addClass" style="margin-top:10px">＋ 新建班级</button>
+          </div>
+        </div></div>
+
+        <div class="panel" style="margin-top:16px"><div class="pad">
+          <h2>校历 · 法定假日（全部班级共用）</h2>
+          <div class="yeartabs" id="yearTabs">
+            <button data-year="2026" class="on">2026</button>
+            <button data-year="2027">2027</button>
+          </div>
+          <div class="hol-list" id="holList"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn ghost sm" id="holAll" style="flex:1">全开</button>
+            <button class="btn ghost sm" id="holNone" style="flex:1">全关</button>
+          </div>
+        </div></div>
+      </aside>
+
+      <main>
+        <div class="panel"><div class="pad" id="editor"></div></div>
+        <div id="detail" style="margin-top:18px"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===================== 汇总总览 ===================== -->
+  <div id="tab-overview" style="display:none">
+    <div class="ov-head">
+      <div>
+        <h1 style="font-size:18px;margin:0">全部班级 · 关键日期</h1>
+        <p class="note" style="margin-top:4px">供教务提前预排考试与人手。日期随校历/请假自动重算。</p>
+      </div>
+      <div class="acts no-print">
+        <button class="btn" id="copyOv">复制表格</button>
+        <button class="btn ghost" id="copyDetail">复制全部明细</button>
+        <button class="btn ghost" id="dlCsv">下载 CSV</button>
+        <button class="btn ghost" id="printBtn">打印 / 存 PDF</button>
+      </div>
+    </div>
+    <div class="card"><div class="tblwrap"><table class="ov-table" id="ovTable"></table></div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- 类型 & 考试 ---------- */
+const TYPES={A0:{name:'A0 语音',color:'#8257C4',short:'语音'},ZJ:{name:'中教 知识',color:'#2FA07A',short:'中'},WJ:{name:'外教 口语',color:'#3B9AD9',short:'外'}};
+const EXAM={mid:{name:'期中',color:'#E0901C'},final:{name:'期末',color:'#E0901C'},bilan:{name:'Bilan 总测',color:'#9B2D5E'}};
+
+function buildSequence(mode){
+  const s=[]; let zj=0,wj=0;
+  for(let i=1;i<=3;i++) s.push({type:'A0',idx:i,exam:null});
+  if(mode==='full'){
+    for(let r=0;r<5;r++){
+      for(let k=0;k<3;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
+      for(let k=0;k<2;k++){wj++; let ex=null; if(r===2&&k===1)ex='mid'; if(r===4&&k===1)ex='final'; s.push({type:'WJ',idx:wj,exam:ex});}
+    }
+    zj++; s.push({type:'ZJ',idx:zj,exam:'bilan'});
+  }else{
+    for(let r=0;r<8;r++){
+      for(let k=0;k<2;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
+      wj++; s.push({type:'WJ',idx:wj,exam:(r===4?'mid':null)});
+    }
+    zj++; s.push({type:'ZJ',idx:zj,exam:null});
+    zj++; s.push({type:'ZJ',idx:zj,exam:'final'});
+  }
+  s.forEach((c,i)=>c.seq=i+1);
+  return s;
+}
+
+/* ---------- 假日 ---------- */
+const HOLIDAYS={
+  2026:[['2026-01-01','元旦 Jour de l\'An'],['2026-02-16','家庭日 Jour de la famille'],['2026-04-03','耶稣受难日 Vendredi saint'],['2026-05-18','爱国者日 Journée des patriotes'],['2026-06-24','魁北克国庆 Saint-Jean-Baptiste'],['2026-07-01','加拿大国庆 Fête du Canada'],['2026-09-07','劳动节 Fête du Travail'],['2026-10-12','感恩节 Action de grâce'],['2026-12-25','圣诞节 Noël']],
+  2027:[['2027-01-01','元旦 Jour de l\'An'],['2027-02-15','家庭日 Family Day'],['2027-03-26','耶稣受难日 Vendredi saint'],['2027-05-24','维多利亚日 Fête de la Reine'],['2027-06-24','圣让-巴蒂斯特 Saint-Jean-Baptiste'],['2027-07-01','加拿大国庆 Fête du Canada'],['2027-08-02','公民日 Congé civique'],['2027-09-06','劳动节 Fête du Travail'],['2027-10-11','感恩节 Action de grâce'],['2027-12-24','平安夜 Noël'],['2027-12-25','圣诞节 Noël']],
+};
+
+/* ---------- 状态 ---------- */
+const WEEK=[{lbl:'一',js:1},{lbl:'二',js:2},{lbl:'三',js:3},{lbl:'四',js:4},{lbl:'五',js:5},{lbl:'六',js:6},{lbl:'日',js:0}];
+const WD_CN=['周日','周一','周二','周三','周四','周五','周六'];
+let CID=0;
+function newClass(){
+  CID++;
+  return {id:CID, name:'班级 '+CID, mode:'full', start:'',
+    days:{A0:[1,2,3,4,5],ZJ:[1,2,3,4,5],WJ:[1,2,3,4,5]},
+    perDay:{A0:1,ZJ:1,WJ:1}, leaves:[]};
+}
+const state={ holEnabled:new Set(), classes:[], activeId:null, tab:'setup', year:2026, view:'chips' };
+Object.values(HOLIDAYS).flat().forEach(([d])=>state.holEnabled.add(d));
+state.classes.push(newClass()); state.activeId=state.classes[0].id;
+const active=()=>state.classes.find(c=>c.id===state.activeId);
+
+/* ---------- 工具 ---------- */
+const pad=n=>String(n).padStart(2,'0');
+const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const md=d=>`${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const[y,m,dd]=s.split('-').map(Number);return new Date(y,m-1,dd);};
+
+function isBlocked(ds,type,cls){
+  if(state.holEnabled.has(ds)) return true;
+  for(const lv of cls.leaves){
+    if(lv.date!==ds) continue;
+    if(lv.scope==='all') return true;
+    if(lv.scope==='ZJ'&&(type==='ZJ'||type==='A0')) return true;
+    if(lv.scope==='WJ'&&type==='WJ') return true;
+  }
+  return false;
+}
+function computeSchedule(cls){
+  if(!cls.start) return {error:'未设开班日期'};
+  for(const t of ['A0','ZJ','WJ']) if(cls.days[t].length===0) return {error:`${TYPES[t].name} 无上课日`};
+  const seq=buildSequence(cls.mode);
+  let cursor=parse(cls.start); const placed={};
+  for(const c of seq){
+    let d=new Date(cursor),guard=0;
+    while(guard++<6000){
+      const ds=fmt(d);
+      const okDay=cls.days[c.type].includes(d.getDay());
+      const cap=((placed[ds]&&placed[ds][c.type])||0)<cls.perDay[c.type];
+      if(okDay&&cap&&!isBlocked(ds,c.type,cls)) break;
+      d.setDate(d.getDate()+1);
+    }
+    const ds=fmt(d); placed[ds]=placed[ds]||{A0:0,ZJ:0,WJ:0}; placed[ds][c.type]++;
+    c.date=new Date(d); cursor=new Date(d);
+  }
+  return {seq};
+}
+function milestones(seq){
+  const g=k=>seq.find(c=>c.exam===k);
+  return {open:seq[0].date, a0:seq[2].date, mid:g('mid')?.date, final:g('final')?.date,
+    bilan:g('bilan')?.date, close:seq[seq.length-1].date,
+    weeks:Math.ceil((seq[seq.length-1].date-seq[0].date)/(7*864e5))+1};
+}
+
+/* ---------- 渲染：班级列表 ---------- */
+function renderClassList(){
+  const box=document.getElementById('clsList'); box.innerHTML='';
+  state.classes.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='clsitem'+(c.id===state.activeId?' on':'');
+    const mt=c.mode==='full'?'全日制':'兼读制';
+    el.innerHTML=`<span class="nm">${c.name}</span><span class="st">${c.start?md(parse(c.start)):'未设'}</span><span class="mt">${mt}</span><span class="del">×</span>`;
+    el.onclick=e=>{ if(e.target.classList.contains('del')) return; state.activeId=c.id; renderAll(); };
+    el.querySelector('.del').onclick=()=>{
+      if(state.classes.length===1){ toast('至少保留一个班级'); return; }
+      state.classes=state.classes.filter(x=>x.id!==c.id);
+      if(state.activeId===c.id) state.activeId=state.classes[0].id;
+      renderAll();
+    };
+    box.appendChild(el);
+  });
+}
+
+/* ---------- 渲染：编辑器 ---------- */
+function renderEditor(){
+  const c=active(); const box=document.getElementById('editor');
+  box.innerHTML=`
+    <div class="editor-head">
+      <input type="text" id="clsName" value="${c.name.replace(/"/g,'&quot;')}">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div><label class="field">开班日期</label><input type="date" id="clsStart" value="${c.start}"></div>
+      <div><label class="field">班型</label>
+        <div class="seg" id="clsMode">
+          <button data-mode="full"${c.mode==='full'?' class="on"':''}>全日制</button>
+          <button data-mode="part"${c.mode==='part'?' class="on"':''}>兼读制</button>
+        </div>
+      </div>
+    </div>
+    <p class="note">${c.mode==='full'?'中中中 + 外外 ×5 轮，期中=外教第 6 堂、期末=外教第 10 堂，末堂中教 Bilan。':'中中 + 外 ×8 轮，末补两堂中教，期中=外教第 5 堂、期末=中教第 18 堂。'}</p>
+
+    <div class="block"><h2>每周上课日</h2><div id="teachers"></div>
+      <p class="note">中教/外教可设不同上课日；系统按 29 堂顺序排到最近的可上课日。全日制一天多堂就调「每天最多堂数」。</p></div>
+
+    <div class="block"><h2>本班请假 / 临时停课</h2>
+      <div class="leave-add">
+        <div class="row1"><input type="date" id="leaveDate"><select id="leaveScope"><option value="all">全班</option><option value="ZJ">中教</option><option value="WJ">外教</option></select></div>
+        <button class="btn sm block" id="leaveAdd">＋ 添加</button>
+      </div>
+      <div id="leaveList" style="margin-top:8px"></div>
+    </div>`;
+
+  document.getElementById('clsName').oninput=e=>{c.name=e.target.value||('班级 '+c.id); renderClassList();};
+  document.getElementById('clsStart').onchange=e=>{c.start=e.target.value; renderClassList(); renderDetail();};
+  box.querySelectorAll('#clsMode button').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode; renderClassList(); renderEditor(); renderDetail();});
+  renderTeachers(c);
+  renderLeaves(c);
+  document.getElementById('leaveAdd').onclick=()=>{
+    const d=document.getElementById('leaveDate').value; if(!d){toast('请选择日期');return;}
+    const scope=document.getElementById('leaveScope').value;
+    if(!c.leaves.some(l=>l.date===d&&l.scope===scope)) c.leaves.push({date:d,scope});
+    document.getElementById('leaveDate').value=''; renderLeaves(c); renderDetail();
+  };
+}
+function renderTeachers(c){
+  const box=document.getElementById('teachers'); box.innerHTML='';
+  for(const t of ['A0','ZJ','WJ']){
+    const row=document.createElement('div'); row.className='teacher-row';
+    row.innerHTML=`<div class="thead"><span class="dot" style="background:${TYPES[t].color}"></span><span class="tname">${t==='A0'?'A0 语音':TYPES[t].name}</span></div>`;
+    const days=document.createElement('div'); days.className='days';
+    WEEK.forEach(w=>{
+      const b=document.createElement('div'); b.className='day'+(c.days[t].includes(w.js)?' on':'');
+      b.style.setProperty('--c',TYPES[t].color); b.textContent=w.lbl;
+      b.onclick=()=>{const a=c.days[t]; const i=a.indexOf(w.js); if(i>=0)a.splice(i,1);else a.push(w.js); b.classList.toggle('on'); renderDetail();};
+      days.appendChild(b);
+    });
+    row.appendChild(days);
+    const pd=document.createElement('div'); pd.className='perday';
+    pd.innerHTML=`每天最多 <select><option>1</option><option>2</option><option>3</option></select> 堂`;
+    pd.querySelector('select').value=c.perDay[t];
+    pd.querySelector('select').onchange=e=>{c.perDay[t]=+e.target.value; renderDetail();};
+    row.appendChild(pd); box.appendChild(row);
+  }
+}
+function renderLeaves(c){
+  const box=document.getElementById('leaveList'); box.innerHTML='';
+  const cn={all:'全班',ZJ:'中教',WJ:'外教'};
+  [...c.leaves].sort((a,b)=>a.date<b.date?-1:1).forEach(lv=>{
+    const dd=parse(lv.date); const el=document.createElement('div'); el.className='leave-item';
+    el.innerHTML=`<span class="n">${md(dd)} ${WD_CN[dd.getDay()]}</span><span class="scopepill">${cn[lv.scope]}</span><span class="x">×</span>`;
+    el.querySelector('.x').onclick=()=>{c.leaves=c.leaves.filter(x=>x!==lv); renderLeaves(c); renderDetail();};
+    box.appendChild(el);
+  });
+}
+
+/* ---------- 渲染：假日 ---------- */
+function renderHolidays(){
+  const list=document.getElementById('holList'); list.innerHTML='';
+  HOLIDAYS[state.year].forEach(([d,name])=>{
+    const on=state.holEnabled.has(d); const dd=parse(d);
+    const el=document.createElement('div'); el.className='hol'+(on?' on':'');
+    el.innerHTML=`<span class="chk">${on?'✓':''}</span><span class="hdate">${d.slice(5)} ${WD_CN[dd.getDay()]}</span><span class="hname">${name}</span>`;
+    el.onclick=()=>{ if(state.holEnabled.has(d))state.holEnabled.delete(d);else state.holEnabled.add(d); renderHolidays(); renderDetail(); };
+    list.appendChild(el);
+  });
+}
+
+/* ---------- 渲染：单班明细 ---------- */
+function chipColor(c){return c.exam?EXAM[c.exam].color:TYPES[c.type].color;}
+function chipLabel(c){return c.exam==='bilan'?'Bil':c.exam==='mid'?'期中':c.exam==='final'?'期末':TYPES[c.type].short+c.idx;}
+function renderDetail(){
+  const c=active(); const root=document.getElementById('detail');
+  const r=computeSchedule(c);
+  if(r.error){ root.innerHTML=`<div class="card"><div class="empty">${r.error}，请在上方补齐后查看日程。</div></div>`; return; }
+  const seq=r.seq, m=milestones(seq);
+  const stat=(k,v)=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  let html=`<div class="summary">${stat('开班',md(m.open))}${stat('结课',md(m.close))}${stat('总课时','29 堂')}${stat('跨越周数',m.weeks+' 周')}</div>`;
+  html+='<div class="exam-cards">';
+  const ord=c.mode==='full'?['mid','final','bilan']:['mid','final'];
+  ord.forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
+    html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${EXAM[k].name}</div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · ${cc.type==='WJ'?'外教':'中教'}第 ${cc.idx} 堂</div></div>`;});
+  html+='</div>';
+  html+=`<div class="card"><div class="chead"><h3>${c.name} · 课程日程</h3>
+    <div class="viewtabs" id="viewTabs">
+      <button data-v="chips"${state.view==='chips'?' class="on"':''}>节奏条</button>
+      <button data-v="table"${state.view==='table'?' class="on"':''}>明细表</button>
+      <button data-v="cal"${state.view==='cal'?' class="on"':''}>日历</button>
+    </div></div><div id="viewBody"></div>
+    <div class="legend">
+      <div class="li"><span class="sw" style="background:${TYPES.A0.color}"></span>A0 语音</div>
+      <div class="li"><span class="sw" style="background:${TYPES.ZJ.color}"></span>中教 知识</div>
+      <div class="li"><span class="sw" style="background:${TYPES.WJ.color}"></span>外教 口语</div>
+      <div class="li"><span class="sw" style="background:${EXAM.mid.color}"></span>期中 / 期末</div>
+      <div class="li"><span class="sw" style="background:${EXAM.bilan.color}"></span>Bilan</div>
+    </div></div>`;
+  root.innerHTML=html;
+  root.querySelectorAll('#viewTabs button').forEach(b=>b.onclick=()=>{state.view=b.dataset.v; renderViewBody(seq);});
+  renderViewBody(seq);
+}
+function renderViewBody(seq){
+  const body=document.getElementById('viewBody');
+  if(state.view==='chips'){
+    let h='<div class="chips">';
+    seq.forEach((c,i)=>{ if(i===3)h+='<span class="chip sep">▮</span>';
+      h+=`<span class="chip" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}</span></span>`;});
+    body.innerHTML=h+'</div>';
+  } else if(state.view==='table'){
+    let h='<div class="tblwrap"><table><thead><tr><th>#</th><th>日期</th><th>星期</th><th>科目</th><th>本科第几堂</th><th>备注</th></tr></thead><tbody>';
+    seq.forEach(c=>{const cls=c.exam==='bilan'?'bilan':(c.exam?'exam':'');
+      const tn=c.type==='A0'?'A0 语音':(c.type==='ZJ'?'中教':'外教');
+      const note=c.exam?`<span class="badge" style="background:${EXAM[c.exam].color}">${EXAM[c.exam].name}</span>`:'';
+      h+=`<tr class="${cls}"><td class="n">${c.seq}</td><td class="n">${fmt(c.date)}</td><td>${WD_CN[c.date.getDay()]}</td><td><span class="tag"><span class="sw" style="background:${TYPES[c.type].color}"></span>${tn}</span></td><td class="n">第 ${c.idx} 堂</td><td>${note}</td></tr>`;});
+    body.innerHTML=h+'</tbody></table></div>';
+  } else body.innerHTML=renderCalendar(seq);
+}
+function renderCalendar(seq){
+  const byDate={}; seq.forEach(c=>{const k=fmt(c.date);(byDate[k]=byDate[k]||[]).push(c);});
+  const first=seq[0].date,last=seq[seq.length-1].date; const months=[]; let m=new Date(first.getFullYear(),first.getMonth(),1);
+  while(m<=last){months.push(new Date(m)); m.setMonth(m.getMonth()+1);}
+  let h='<div class="cal">';
+  months.forEach(mo=>{const y=mo.getFullYear(),mon=mo.getMonth();
+    h+=`<div class="month"><h4>${y} 年 ${mon+1} 月</h4><div class="mgrid">`;
+    ['一','二','三','四','五','六','日'].forEach(w=>h+=`<div class="wd">${w}</div>`);
+    let lead=(new Date(y,mon,1).getDay()+6)%7; for(let i=0;i<lead;i++)h+='<div></div>';
+    const dim=new Date(y,mon+1,0).getDate();
+    for(let dn=1;dn<=dim;dn++){const ds=`${y}-${pad(mon+1)}-${pad(dn)}`; const cs=byDate[ds]; const isHol=state.holEnabled.has(ds);
+      let cls='cell'; if(isHol)cls+=' hol';
+      if(cs){cls+=' has'; if(cs.some(c=>c.exam==='bilan'))cls+=' bil'; else if(cs.some(c=>c.exam))cls+=' exam';}
+      let dots=''; if(cs)cs.forEach(c=>dots+=`<span class="cdot" style="background:${chipColor(c)}"></span>`);
+      h+=`<div class="${cls}"><span class="dd">${dn}</span><span class="cdots">${dots}</span></div>`;}
+    h+='</div></div>';});
+  return h+'</div>';
+}
+
+/* ---------- 渲染：汇总总览 ---------- */
+function renderOverview(){
+  const t=document.getElementById('ovTable');
+  let h='<thead><tr><th>班级</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中</th><th>期末</th><th>Bilan</th><th>结课</th><th>周数</th></tr></thead><tbody>';
+  state.classes.forEach(c=>{
+    const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
+    if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
+    const m=milestones(r.seq);
+    const wd=d=>d?`${md(d)} ${WD_CN[d.getDay()]}`:'—';
+    h+=`<tr><td><b>${esc(c.name)}</b></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}</td><td class="n fin">${wd(m.final)}</td><td class="n bil">${wd(m.bilan)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+}
+const esc=s=>String(s).replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[x]));
+
+/* ---------- 复制 / 导出 ---------- */
+function ovTSV(){
+  const head=['班级','班型','开班','A0完成','期中','期末','Bilan','结课','周数'];
+  const rows=[head.join('\t')];
+  state.classes.forEach(c=>{
+    const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
+    if(r.error){ rows.push([c.name,mt,r.error,'','','','','',''].join('\t')); return; }
+    const m=milestones(r.seq); const f=d=>d?fmt(d):'';
+    rows.push([c.name,mt,f(m.open),f(m.a0),f(m.mid),f(m.final),f(m.bilan),f(m.close),m.weeks].join('\t'));
+  });
+  return rows.join('\n');
+}
+function detailTSV(){
+  const rows=[['班级','班型','序号','日期','星期','科目','本科第几堂','备注'].join('\t')];
+  state.classes.forEach(c=>{
+    const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
+    if(r.error){ rows.push([c.name,mt,'',r.error,'','','',''].join('\t')); return; }
+    r.seq.forEach(x=>{const tn=x.type==='A0'?'A0语音':(x.type==='ZJ'?'中教':'外教');
+      rows.push([c.name,mt,x.seq,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',x.exam?EXAM[x.exam].name:''].join('\t'));});
+  });
+  return rows.join('\n');
+}
+function copyText(txt,msg){
+  const done=()=>toast(msg||'已复制');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
+  } else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,cb){
+  const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{document.execCommand('copy'); cb();}catch(e){toast('复制失败，请用「下载 CSV」');}
+  document.body.removeChild(ta);
+}
+function download(name,text){
+  const blob=new Blob(['\ufeff'+text.replace(/\t/g,',')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast('已下载 CSV');
+}
+let toastT;
+function toast(m){const el=document.getElementById('toast'); el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1800);}
+
+/* ---------- 事件 ---------- */
+document.getElementById('addClass').onclick=()=>{const c=newClass(); state.classes.push(c); state.activeId=c.id; renderAll();};
+document.querySelectorAll('.maintabs button').forEach(b=>b.onclick=()=>{
+  state.tab=b.dataset.tab;
+  document.querySelectorAll('.maintabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('tab-setup').style.display=state.tab==='setup'?'':'none';
+  document.getElementById('tab-overview').style.display=state.tab==='overview'?'':'none';
+  if(state.tab==='overview') renderOverview();
+});
+document.querySelectorAll('#yearTabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#yearTabs button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  state.year=+b.dataset.year; renderHolidays();
+});
+document.getElementById('holAll').onclick=()=>{HOLIDAYS[state.year].forEach(([d])=>state.holEnabled.add(d)); renderHolidays(); renderDetail();};
+document.getElementById('holNone').onclick=()=>{HOLIDAYS[state.year].forEach(([d])=>state.holEnabled.delete(d)); renderHolidays(); renderDetail();};
+document.getElementById('copyOv').onclick=()=>copyText(ovTSV(),'汇总表已复制，可贴到 Excel');
+document.getElementById('copyDetail').onclick=()=>copyText(detailTSV(),'全部明细已复制');
+document.getElementById('dlCsv').onclick=()=>download('MLI排课汇总.csv',ovTSV());
+document.getElementById('printBtn').onclick=()=>{renderOverview(); window.print();};
+
+/* ---------- 初始化 ---------- */
+function renderAll(){ renderClassList(); renderEditor(); renderDetail(); if(state.tab==='overview')renderOverview(); }
+renderHolidays(); renderAll();
+</script>
+</body>
+</html>
