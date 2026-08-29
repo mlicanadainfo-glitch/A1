@@ -150,6 +150,9 @@
   .lrow2 .tilde{color:var(--muted); font-weight:700}
   .lrow2b{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px}
   .kindpill{font-size:11px; font-weight:700; padding:1px 8px; border-radius:20px; border:1px solid; flex:none}
+  .a0row{display:flex; align-items:center; gap:9px; margin:14px 0 4px; padding:11px 13px; border:1px solid var(--line); border-radius:10px; background:var(--soft); font-size:13.5px; font-weight:600; cursor:pointer}
+  .a0row input{width:17px; height:17px; accent-color:var(--brand); cursor:pointer}
+  .a0row .a0hint{margin-left:auto; font-size:12px; font-weight:700; color:var(--muted)}
 
   .legend{display:flex; flex-wrap:wrap; gap:14px; padding:13px 16px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted)}
   .legend .li{display:flex; align-items:center; gap:6px}
@@ -179,7 +182,7 @@
     <img src="data:image/jpeg;base64,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" alt="MLI">
     <div class="ti"><h1>排课计算器</h1></div>
   </header>
-  <p class="sub">按班级把 A0 语音 3 堂 + A1 阶段共 29 堂铺进真实日历，自动跳过法定假日与请假日；教务可管理多个班级，最后在「汇总总览」一次导出所有班的考试与结课日期。</p>
+  <p class="sub">按班级把 A0 语音 + A1 阶段（含 A0 共 29 堂，不含 A0 则 26 堂）铺进真实日历，自动跳过法定假日与请假日；教务可管理多个班级，最后在「汇总总览」一次导出所有班的考试与结课日期。</p>
 
   <div class="maintabs">
     <button data-tab="setup" class="on">班级设置</button>
@@ -259,9 +262,9 @@ const KIND={leave:{name:'请假',color:'#c0392b',bg:'#fdecec',border:'#e6b0b0',i
 const SCOPE={all:'全班',ZJ:'中教',WJ:'外教'};
 const calTag=(kind,scope)=> kind==='vacation' ? (scope==='all'?'休假':scope==='ZJ'?'中休':'外休') : (scope==='all'?'停课':scope==='ZJ'?'中假':'外假');
 
-function buildSequence(mode){
+function buildSequence(mode, withA0=true){
   const s=[]; let zj=0,wj=0;
-  for(let i=1;i<=3;i++) s.push({type:'A0',idx:i,exam:null});
+  if(withA0) for(let i=1;i<=3;i++) s.push({type:'A0',idx:i,exam:null});
   if(mode==='full'){
     for(let r=0;r<5;r++){
       for(let k=0;k<3;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
@@ -292,7 +295,7 @@ const WD_CN=['周日','周一','周二','周三','周四','周五','周六'];
 let CID=0;
 function newClass(){
   CID++;
-  return {id:CID, name:'班级 '+CID, mode:'full', start:'',
+  return {id:CID, name:'班级 '+CID, mode:'full', start:'', a0:true,
     days:{A0:[1,2,3,4,5],ZJ:[1,2,3,4,5],WJ:[1,2,3,4,5]},
     perDay:{A0:1,ZJ:1,WJ:1}, leaves:[]};
 }
@@ -303,7 +306,7 @@ const HOL_VERSION=2;                            // 每次新增预载假日就 +
 const HOL_NEW={2:['2026-12-26','2026-12-28']};  // 各版本新增、对老用户自动开启
 function snapshot(){ return {v:1,holVer:HOL_VERSION,CID,activeId:state.activeId,year:state.year,holEnabled:[...state.holEnabled],custom:state.custom,classes:state.classes}; }
 function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(snapshot())); }catch(e){} }
-function migrateLeaves(c){ c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
+function migrateLeaves(c){ if(c.a0===undefined)c.a0=true; c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
 function restore(d){ if(!d||!d.classes||!d.classes.length) return false;
   state.classes=d.classes.map(migrateLeaves); state.activeId=d.activeId||d.classes[0].id;
   state.holEnabled=new Set(d.holEnabled||[]); state.custom=d.custom||[]; state.year=d.year||2026;
@@ -331,8 +334,9 @@ function isBlocked(ds,type,cls){
 }
 function computeSchedule(cls){
   if(!cls.start) return {error:'未设开班日期'};
-  for(const t of ['A0','ZJ','WJ']) if(cls.days[t].length===0) return {error:`${TYPES[t].name} 无上课日`};
-  const seq=buildSequence(cls.mode);
+  const need = cls.a0!==false ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
+  for(const t of need) if(cls.days[t].length===0) return {error:`${TYPES[t].name} 无上课日`};
+  const seq=buildSequence(cls.mode, cls.a0!==false);
   const placed={}; // 每类各自计数，中教/外教可同日不冲突
   function place(list, from){
     let cursor=new Date(from);
@@ -349,11 +353,11 @@ function computeSchedule(cls){
       c.date=new Date(d); cursor=new Date(d);
     }
   }
-  // A0 语音先上完；之后中教、外教各自独立排课，一方请假不影响另一方
+  // 有 A0 则先上完 A0，A1 顺延其后；无 A0 则中教/外教直接从开班日各自独立排课
   const start=parse(cls.start);
-  place(seq.filter(c=>c.type==='A0'), start);
   const a0s=seq.filter(c=>c.type==='A0');
-  const after=new Date(a0s[a0s.length-1].date); after.setDate(after.getDate()+1);
+  let after=start;
+  if(a0s.length){ place(a0s, start); after=new Date(a0s[a0s.length-1].date); after.setDate(after.getDate()+1); }
   place(seq.filter(c=>c.type==='ZJ'), after);
   place(seq.filter(c=>c.type==='WJ'), after);
   return {seq};
@@ -363,7 +367,7 @@ function milestones(seq){
   const dates=seq.map(c=>+c.date);
   const open=new Date(Math.min(...dates)), close=new Date(Math.max(...dates));
   const a0s=seq.filter(c=>c.type==='A0');
-  return {open, a0:a0s[a0s.length-1].date, mid:g('mid')?.date, final:g('final')?.date,
+  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:g('mid')?.date, final:g('final')?.date,
     bilan:g('bilan')?.date, close, weeks:Math.ceil((close-open)/(7*864e5))+1};
 }
 
@@ -404,8 +408,10 @@ function renderEditor(){
     </div>
     <p class="note">${c.mode==='full'?'中中中 + 外外 ×5 轮，期中=外教第 6 堂、期末=外教第 10 堂，末堂中教 Bilan。':'中中 + 外 ×8 轮，末补两堂中教，期中=外教第 5 堂、期末=中教第 18 堂。'}</p>
 
+    <label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（3 堂）</span><span class="a0hint">${c.a0!==false?'共 29 堂':'仅算 A1，共 26 堂'}</span></label>
+
     <div class="block"><h2>每周上课日</h2><div id="teachers"></div>
-      <p class="note">A0 语音先上完，之后中教、外教各走各的上课日、各自排课——一方请假只顺延自己的课，不影响另一方。全日制一天多堂就调「每天最多堂数」。</p></div>
+      <p class="note">${c.a0!==false?'A0 语音先上完，之后中教、外教各走各的上课日、各自排课':'从 A1 开始，中教、外教各走各的上课日、各自排课'}——一方请假只顺延自己的课，不影响另一方。全日制一天多堂就调「每天最多堂数」。</p></div>
 
     <div class="block"><h2>本班请假 / 休假 / 停课</h2>
       <div class="leave-add">
@@ -423,6 +429,7 @@ function renderEditor(){
   document.getElementById('clsName').oninput=e=>{c.name=e.target.value||('班级 '+c.id); renderClassList(); save();};
   document.getElementById('clsStart').onchange=e=>{c.start=e.target.value; renderClassList(); renderDetail();};
   box.querySelectorAll('#clsMode button').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode; renderClassList(); renderEditor(); renderDetail();});
+  document.getElementById('clsA0').onchange=e=>{c.a0=e.target.checked; renderEditor(); renderDetail();};
   renderTeachers(c);
   renderLeaves(c);
   document.getElementById('leaveAdd').onclick=()=>{
@@ -435,7 +442,8 @@ function renderEditor(){
 }
 function renderTeachers(c){
   const box=document.getElementById('teachers'); box.innerHTML='';
-  for(const t of ['A0','ZJ','WJ']){
+  const types = c.a0!==false ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
+  for(const t of types){
     const row=document.createElement('div'); row.className='teacher-row';
     row.innerHTML=`<div class="thead"><span class="dot" style="background:${TYPES[t].color}"></span><span class="tname">${t==='A0'?'A0 语音':TYPES[t].name}</span></div>`;
     const days=document.createElement('div'); days.className='days';
@@ -492,7 +500,7 @@ function renderDetail(){
   if(r.error){ root.innerHTML=`<div class="card"><div class="empty">${r.error}，请在上方补齐后查看日程。</div></div>`; return; }
   const seq=r.seq, m=milestones(seq);
   const stat=(k,v)=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
-  let html=`<div class="summary">${stat('开班',md(m.open))}${stat('结课',md(m.close))}${stat('总课时','29 堂')}${stat('跨越周数',m.weeks+' 周')}</div>`;
+  let html=`<div class="summary">${stat('开班',md(m.open))}${stat('结课',md(m.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',m.weeks+' 周')}</div>`;
   html+='<div class="exam-cards">';
   const ord=c.mode==='full'?['mid','final','bilan']:['mid','final'];
   ord.forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
@@ -532,7 +540,7 @@ function renderViewBody(seq){
     merge().forEach(it=>{
       if(it.leave){ const k=KIND[it.lv.kind]||KIND.leave;
         h+=`<span class="chip lchip" style="background:${k.bg};color:${k.color};border-color:${k.border}"><span class="cn">${rlabel(it.lv)}</span><span class="cd">${rrange(it.lv)}</span></span>`; return; }
-      const c=it.c; if(!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
+      const c=it.c; if(active().a0!==false&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
       h+=`<span class="chip" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}</span></span>`;});
     body.innerHTML=h+'</div>';
   } else if(state.view==='table'){
