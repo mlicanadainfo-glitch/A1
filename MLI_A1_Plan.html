@@ -148,6 +148,13 @@
   .chip.hchip{background:#fff3e6; color:#b4690e; border:1px dashed #e3b478}
   tr.lrow.holiday td{background:#fff5ea; color:#b4690e}
   .cell .htag{font-size:8.5px; color:var(--danger); font-weight:800; line-height:1.05; margin-top:1px; text-align:center; padding:0 2px; overflow:hidden; max-height:20px}
+  .tally{font-size:12.5px; color:var(--muted); font-weight:600; margin:-6px 0 16px; letter-spacing:.2px}
+  .tally b{color:var(--ink)}
+  .warnbar.special{background:#eaf4fb; border-color:#a8cfe6; color:#1d5c80}
+  .warnbar{background:#fff4e5; border:1px solid #f0c98a; color:#8a5a12; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; margin-bottom:18px; line-height:1.5}
+  .badge.xtra{background:#5f7183; margin-left:5px}
+  .ecard .by{float:right; font-size:11px; font-weight:800; background:rgba(255,255,255,.28); padding:1px 7px; border-radius:20px}
+  .ov-table .by-i{font-size:11px; font-weight:800; color:#fff; background:var(--muted); padding:1px 6px; border-radius:20px; margin-left:2px}
   .ecard.home{background:#fff; color:var(--ink); border:1.5px dashed var(--exam)}
   .ecard.home .lbl{color:var(--exam); opacity:1}
   .ecard.home .w{color:var(--muted); opacity:1}
@@ -275,11 +282,12 @@ function buildSequence(mode, withA0=true){
   const s=[]; let zj=0,wj=0;
   if(withA0) for(let i=1;i<=3;i++) s.push({type:'A0',idx:i,exam:null});
   if(mode==='full'){
+    /* 内容课：中教 15 堂新知识（硬底线，永不被考试占用）+ 外教 9 堂口语；
+       Bilan 与期末另排两堂，排在全部内容课之后最近的两个上课日，轮到谁就是谁。合计 26 堂。 */
     for(let r=0;r<5;r++){
       for(let k=0;k<3;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
-      for(let k=0;k<2;k++){wj++; s.push({type:'WJ',idx:wj,exam:null});}
+      for(let k=0;k<(r<4?2:1);k++){wj++; s.push({type:'WJ',idx:wj,exam:null});}
     }
-    zj++; s.push({type:'ZJ',idx:zj,exam:'bilan'});
   }else{
     for(let r=0;r<8;r++){
       for(let k=0;k<2;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
@@ -291,12 +299,7 @@ function buildSequence(mode, withA0=true){
   s.forEach((c,i)=>c.seq=i+1);
   return s;
 }
-/* 排课完成后才定期末：按日历取真正的最后一堂；若该堂已是 Bilan，则往前顺推一堂 */
-function assignFinal(seq){
-  const byDate=[...seq].sort((a,b)=>(a.date-b.date)||(a.seq-b.seq));
-  byDate.forEach((c,i)=>c.no=i+1);
-  for(let i=byDate.length-1;i>=0;i--){ if(!byDate[i].exam){ byDate[i].exam='final'; break; } }
-}
+const teacherOf=c=>c.type==='WJ'?'外教':(c.type==='ZJ'?'中教':'A0 语音');
 function midSuggest(seq,mode){
   const a=MID_ANCHOR[mode]||MID_ANCHOR.part;
   const c=seq.find(x=>x.type===a.type&&x.idx===a.idx);
@@ -380,16 +383,46 @@ function computeSchedule(cls){
   if(a0s.length){ place(a0s, start); after=new Date(a0s[a0s.length-1].date); after.setDate(after.getDate()+1); }
   place(seq.filter(c=>c.type==='ZJ'), after);
   place(seq.filter(c=>c.type==='WJ'), after);
-  assignFinal(seq);
-  return {seq};
+
+  /* 考试：内容课全部上完后，接着最近的两个上课日安排 Bilan 与期末，轮到谁就是谁；
+     同一天两位老师都能排时以中教为主。中教 15 堂新知识永远不被占用。 */
+  let special=null;
+  if(cls.mode==='full'){
+    let last=new Date(Math.max(...seq.map(c=>+c.date)));
+    const nextIdx=t=>Math.max(0,...seq.filter(c=>c.type===t).map(c=>c.idx))+1;
+    ['bilan','final'].forEach(k=>{
+      let d=new Date(last); d.setDate(d.getDate()+1);
+      for(let g=0;g<6000;g++){
+        const ds=fmt(d);
+        const ok=['ZJ','WJ'].filter(t=>cls.days[t].includes(d.getDay())&&((placed[ds]&&placed[ds][t])||0)<cls.perDay[t]&&!isBlocked(ds,t,cls));
+        if(ok.length){
+          const t=ok.includes('ZJ')?'ZJ':'WJ';
+          placed[ds]=placed[ds]||{A0:0,ZJ:0,WJ:0}; placed[ds][t]++;
+          seq.push({type:t,idx:nextIdx(t),exam:k,date:new Date(d),examSlot:true,seq:seq.length+1});
+          last=new Date(d); break;
+        }
+        d.setDate(d.getDate()+1);
+      }
+    });
+  } else {
+    const zjs=seq.filter(c=>c.type==='ZJ').sort((a,b)=>a.date-b.date);
+    zjs[zjs.length-1].exam='final';
+  }
+  const byDate=[...seq].sort((a,b)=>(a.date-b.date)||(a.seq-b.seq));
+  byDate.forEach((c,i)=>c.no=i+1);
+  const finDate=seq.find(c=>c.exam==='final').date;
+  const lateWJ=seq.filter(c=>c.type==='WJ'&&c.date>finDate).sort((a,b)=>a.date-b.date);
+  return {seq, lateWJ, special};
 }
 function milestones(seq,mode){
   const g=k=>seq.find(c=>c.exam===k);
   const dates=seq.map(c=>+c.date);
   const open=new Date(Math.min(...dates)), close=new Date(Math.max(...dates));
   const a0s=seq.filter(c=>c.type==='A0');
-  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:midSuggest(seq,mode), final:g('final')?.date,
-    bilan:g('bilan')?.date, close, weeks:Math.ceil((close-open)/(7*864e5))+1};
+  const fi=g('final'), bi=g('bilan');
+  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:midSuggest(seq,mode),
+    final:fi?.date, finalBy:fi?teacherOf(fi):null, bilan:bi?.date, bilanBy:bi?teacherOf(bi):null,
+    close, weeks:Math.ceil((close-open)/(7*864e5))+1};
 }
 
 /* ---------- 渲染：班级列表 ---------- */
@@ -427,7 +460,7 @@ function renderEditor(){
         </div>
       </div>
     </div>
-    <p class="note">${c.mode==='full'?'中中中 + 外外 ×5 轮，末堂中教 Bilan。期末＝日历上真正的最后一堂（Bilan 那堂则往前顺推一堂）；期中改为在家完成，不占课堂，只给建议完成日。':'中中 + 外 ×8 轮，末补两堂中教。期末＝日历上真正的最后一堂（含 A0 即第 29 次课）；期中改为在家完成，不占课堂，只给建议完成日。'}</p>
+    <p class="note">${c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补两堂中教。期末＝中教第 18 堂，不加课。'}期中改为在家完成，不占课堂，只给建议完成日。</p>
 
     <label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（3 堂）</span><span class="a0hint">${c.a0!==false?'共 29 堂':'仅算 A1，共 26 堂'}</span></label>
 
@@ -540,9 +573,16 @@ function renderDetail(){
   let html=`<div class="summary">${stat('开班',md(m.open))}${stat('结课',md(m.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',m.weeks+' 周')}</div>`;
   html+='<div class="exam-cards">';
   if(m.mid) html+=`<div class="ecard home"><div class="lbl">期中 · 在家完成</div><div class="d">${md(m.mid)}</div><div class="w">${WD_CN[m.mid.getDay()]} · 建议完成日，不占课堂</div></div>`;
-  (c.mode==='full'?['final','bilan']:['final']).forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
-    html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${EXAM[k].name}</div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.no} 次课 · ${cc.type==='WJ'?'外教':'中教'}第 ${cc.idx} 堂</div></div>`;});
+  (c.mode==='full'?['bilan','final']:['final']).forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
+    html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${EXAM[k].name}<span class="by">${teacherOf(cc)}考</span></div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.no} 次课 · ${teacherOf(cc)}第 ${cc.idx} 堂</div></div>`;});
   html+='</div>';
+  {const zc=seq.filter(x=>x.type==='ZJ'), wc=seq.filter(x=>x.type==='WJ');
+   const zn=zc.filter(x=>!x.exam).length, wn=wc.filter(x=>!x.exam).length;
+   html+=`<div class="tally">内容课时：中教新知识 <b>${zn}</b> 堂 · 外教口语 <b>${wn}</b> 堂 · 考试占用 <b>${zc.length+wc.length-zn-wn}</b> 堂 · 合计 <b>${seq.length}</b> 堂</div>`;}
+  if(r.lateWJ&&r.lateWJ.length){
+    const ds=r.lateWJ.map(x=>`外教第 ${x.idx} 堂 ${md(x.date)}`).join('、');
+    html+=`<div class="warnbar">⚠ 期末（${md(m.final)}）之后外教还剩 ${r.lateWJ.length} 堂：${ds}。请决定改期、并堂，或当作考后口语课。</div>`;
+  }
   html+=`<div class="card"><div class="chead"><h3>${c.name} · 课程日程</h3>
     <div class="viewtabs" id="viewTabs">
       <button data-v="chips"${state.view==='chips'?' class="on"':''}>节奏条</button>
@@ -582,7 +622,7 @@ function renderViewBody(seq){
       if(it.k==='lv'){ const k=KIND[it.lv.kind]||KIND.leave;
         h+=`<span class="chip lchip" style="background:${k.bg};color:${k.color};border-color:${k.border}"><span class="cn">${rlabel(it.lv)}</span><span class="cd">${rrange(it.lv)}</span></span>`; return; }
       const c=it.c; if(active().a0!==false&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
-      h+=`<span class="chip" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}</span></span>`;});
+      h+=`<span class="chip" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}${c.exam?' '+teacherOf(c):''}</span></span>`;});
     body.innerHTML=h+'</div>';
   } else if(state.view==='table'){
     let h='<div class="tblwrap"><table><thead><tr><th>#</th><th>日期</th><th>星期</th><th>科目</th><th>本科第几堂</th><th>备注</th></tr></thead><tbody>'; let n=0;
@@ -593,7 +633,7 @@ function renderViewBody(seq){
         h+=`<tr class="lrow ${lv.kind}"><td></td><td class="n">${rrange(lv,true)}</td><td>${single?WD_CN[parse(lv.start).getDay()]:'—'}</td><td class="lcell" colspan="3">${k.icon} ${rlabel(lv)} · 期间顺延</td></tr>`; return; }
       const c=it.c; n++; const cl=c.exam==='bilan'?'bilan':(c.exam?'exam':'');
       const tn=c.type==='A0'?'A0 语音':(c.type==='ZJ'?'中教':'外教');
-      const note=c.exam?`<span class="badge" style="background:${EXAM[c.exam].color}">${EXAM[c.exam].name}</span>`:'';
+      const note=c.exam?`<span class="badge" style="background:${EXAM[c.exam].color}">${EXAM[c.exam].name} · ${tn}考</span>${c.examSlot?'<span class="badge xtra">考试堂</span>':''}`:'';
       h+=`<tr class="${cl}"><td class="n">${n}</td><td class="n">${fmt(c.date)}</td><td>${WD_CN[c.date.getDay()]}</td><td><span class="tag"><span class="sw" style="background:${TYPES[c.type].color}"></span>${tn}</span></td><td class="n">第 ${c.idx} 堂</td><td>${note}</td></tr>`;});
     body.innerHTML=h+'</tbody></table></div>';
   } else body.innerHTML=renderCalendar(seq);
@@ -633,7 +673,8 @@ function renderOverview(){
     if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
     const m=milestones(r.seq,c.mode);
     const wd=d=>d?`${md(d)} ${WD_CN[d.getDay()]}`:'—';
-    h+=`<tr><td><b>${esc(c.name)}</b></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}</td><td class="n fin">${wd(m.final)}</td><td class="n bil">${wd(m.bilan)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
+    const wdby=(d,by)=>d?`${wd(d)} <span class="by-i">${by}考</span>`:'—';
+    h+=`<tr><td><b>${esc(c.name)}</b></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}${m.mid?' <span class="by-i">在家</span>':''}</td><td class="n fin">${wdby(m.final,m.finalBy)}</td><td class="n bil">${wdby(m.bilan,m.bilanBy)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
   });
   t.innerHTML=h+'</tbody>';
 }
@@ -647,7 +688,8 @@ function ovTSV(){
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     if(r.error){ rows.push([c.name,mt,r.error,'','','','','',''].join('\t')); return; }
     const m=milestones(r.seq,c.mode); const f=d=>d?fmt(d):'';
-    rows.push([c.name,mt,f(m.open),f(m.a0),f(m.mid),f(m.final),f(m.bilan),f(m.close),m.weeks].join('\t'));
+    const fb=(d,by)=>d?fmt(d)+'（'+by+'考）':'';
+    rows.push([c.name,mt,f(m.open),f(m.a0),f(m.mid),fb(m.final,m.finalBy),fb(m.bilan,m.bilanBy),f(m.close),m.weeks].join('\t'));
   });
   return rows.join('\n');
 }
@@ -670,7 +712,7 @@ function detailTSV(){
         const dcol=single?fmt(parse(lv.start)):`${fmt(parse(lv.start))}→${fmt(parse(lv.end))}`;
         rows.push([c.name,mt,'',dcol,single?WD_CN[parse(lv.start).getDay()]:'—','—','',SCOPE[lv.scope]+k.name+' · 顺延'].join('\t')); return; }
       const x=it.x; n++; const tn=x.type==='A0'?'A0语音':(x.type==='ZJ'?'中教':'外教');
-      rows.push([c.name,mt,n,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',x.exam?EXAM[x.exam].name:''].join('\t'));
+      rows.push([c.name,mt,n,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',x.exam?EXAM[x.exam].name+' · '+tn+'考':''].join('\t'));
     });
   });
   return rows.join('\n');
