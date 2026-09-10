@@ -145,6 +145,12 @@
   .cell .ltag{font-size:9px; color:#c0392b; font-weight:800; line-height:1; margin-top:1px}
   tr.lrow.leave td{background:#fdecec; color:#c0392b} tr.lrow.vacation td{background:#eef1f5; color:#475569} .lcell{font-weight:700}
   .chip.lchip{border:1px solid #e6b0b0}
+  .chip.hchip{background:#fff3e6; color:#b4690e; border:1px dashed #e3b478}
+  tr.lrow.holiday td{background:#fff5ea; color:#b4690e}
+  .cell .htag{font-size:8.5px; color:var(--danger); font-weight:800; line-height:1.05; margin-top:1px; text-align:center; padding:0 2px; overflow:hidden; max-height:20px}
+  .ecard.home{background:#fff; color:var(--ink); border:1.5px dashed var(--exam)}
+  .ecard.home .lbl{color:var(--exam); opacity:1}
+  .ecard.home .w{color:var(--muted); opacity:1}
   .cell.vac{background:#eef1f5} .cell.leave{background:#fdecec}
   .lrow2{display:grid; grid-template-columns:1fr auto 1fr; gap:6px; align-items:center; margin-bottom:8px}
   .lrow2 .tilde{color:var(--muted); font-weight:700}
@@ -262,25 +268,39 @@ const KIND={leave:{name:'请假',color:'#c0392b',bg:'#fdecec',border:'#e6b0b0',i
 const SCOPE={all:'全班',ZJ:'中教',WJ:'外教'};
 const calTag=(kind,scope)=> kind==='vacation' ? (scope==='all'?'休假':scope==='ZJ'?'中休':'外休') : (scope==='all'?'停课':scope==='ZJ'?'中假':'外假');
 
+/* 期中改为在家完成：不再占用任何一堂课，只按下列锚点算一个「建议完成日」 */
+const MID_ANCHOR={full:{type:'WJ',idx:6}, part:{type:'WJ',idx:5}};
+
 function buildSequence(mode, withA0=true){
   const s=[]; let zj=0,wj=0;
   if(withA0) for(let i=1;i<=3;i++) s.push({type:'A0',idx:i,exam:null});
   if(mode==='full'){
     for(let r=0;r<5;r++){
       for(let k=0;k<3;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
-      for(let k=0;k<2;k++){wj++; let ex=null; if(r===2&&k===1)ex='mid'; if(r===4&&k===1)ex='final'; s.push({type:'WJ',idx:wj,exam:ex});}
+      for(let k=0;k<2;k++){wj++; s.push({type:'WJ',idx:wj,exam:null});}
     }
     zj++; s.push({type:'ZJ',idx:zj,exam:'bilan'});
   }else{
     for(let r=0;r<8;r++){
       for(let k=0;k<2;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
-      wj++; s.push({type:'WJ',idx:wj,exam:(r===4?'mid':null)});
+      wj++; s.push({type:'WJ',idx:wj,exam:null});
     }
     zj++; s.push({type:'ZJ',idx:zj,exam:null});
-    zj++; s.push({type:'ZJ',idx:zj,exam:'final'});
+    zj++; s.push({type:'ZJ',idx:zj,exam:null});
   }
   s.forEach((c,i)=>c.seq=i+1);
   return s;
+}
+/* 排课完成后才定期末：按日历取真正的最后一堂；若该堂已是 Bilan，则往前顺推一堂 */
+function assignFinal(seq){
+  const byDate=[...seq].sort((a,b)=>(a.date-b.date)||(a.seq-b.seq));
+  byDate.forEach((c,i)=>c.no=i+1);
+  for(let i=byDate.length-1;i>=0;i--){ if(!byDate[i].exam){ byDate[i].exam='final'; break; } }
+}
+function midSuggest(seq,mode){
+  const a=MID_ANCHOR[mode]||MID_ANCHOR.part;
+  const c=seq.find(x=>x.type===a.type&&x.idx===a.idx);
+  return c?c.date:null;
 }
 
 /* ---------- 假日 ---------- */
@@ -360,14 +380,15 @@ function computeSchedule(cls){
   if(a0s.length){ place(a0s, start); after=new Date(a0s[a0s.length-1].date); after.setDate(after.getDate()+1); }
   place(seq.filter(c=>c.type==='ZJ'), after);
   place(seq.filter(c=>c.type==='WJ'), after);
+  assignFinal(seq);
   return {seq};
 }
-function milestones(seq){
+function milestones(seq,mode){
   const g=k=>seq.find(c=>c.exam===k);
   const dates=seq.map(c=>+c.date);
   const open=new Date(Math.min(...dates)), close=new Date(Math.max(...dates));
   const a0s=seq.filter(c=>c.type==='A0');
-  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:g('mid')?.date, final:g('final')?.date,
+  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:midSuggest(seq,mode), final:g('final')?.date,
     bilan:g('bilan')?.date, close, weeks:Math.ceil((close-open)/(7*864e5))+1};
 }
 
@@ -406,7 +427,7 @@ function renderEditor(){
         </div>
       </div>
     </div>
-    <p class="note">${c.mode==='full'?'中中中 + 外外 ×5 轮，期中=外教第 6 堂、期末=外教第 10 堂，末堂中教 Bilan。':'中中 + 外 ×8 轮，末补两堂中教，期中=外教第 5 堂、期末=中教第 18 堂。'}</p>
+    <p class="note">${c.mode==='full'?'中中中 + 外外 ×5 轮，末堂中教 Bilan。期末＝日历上真正的最后一堂（Bilan 那堂则往前顺推一堂）；期中改为在家完成，不占课堂，只给建议完成日。':'中中 + 外 ×8 轮，末补两堂中教。期末＝日历上真正的最后一堂（含 A0 即第 29 次课）；期中改为在家完成，不占课堂，只给建议完成日。'}</p>
 
     <label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（3 堂）</span><span class="a0hint">${c.a0!==false?'共 29 堂':'仅算 A1，共 26 堂'}</span></label>
 
@@ -479,6 +500,22 @@ function holsForYear(y){
   const cus=state.custom.filter(h=>h.date.startsWith(y+'-')).map(h=>[h.date,h.name,true]);
   return [...pre,...cus].sort((a,b)=>a[0]<b[0]?-1:1);
 }
+function holidayName(ds){
+  const y=+ds.slice(0,4);
+  const pre=(HOLIDAYS[y]||[]).find(([d])=>d===ds); if(pre) return pre[1];
+  const cu=state.custom.find(h=>h.date===ds); return cu?cu.name:'假日';
+}
+/* 落在开班~结课之间、且压到该班上课日的法定假日——用来解释「为什么外教走得慢」 */
+function holidaysInRange(cls,lo,hi){
+  const kinds = cls.a0!==false?['A0','ZJ','WJ']:['ZJ','WJ'];
+  return [...state.holEnabled].sort().map(ds=>{
+    const d=parse(ds), t=+d; if(t<lo||t>hi) return null;
+    const hit=kinds.filter(k=>cls.days[k].includes(d.getDay()));
+    if(!hit.length) return null;
+    const zj=hit.includes('ZJ')||hit.includes('A0'), wj=hit.includes('WJ');
+    return {date:d, ds, name:holidayName(ds), scope: zj&&wj?'all':(zj?'ZJ':'WJ')};
+  }).filter(Boolean);
+}
 function renderHolidays(){
   const list=document.getElementById('holList'); list.innerHTML='';
   holsForYear(state.year).forEach(([d,name,custom])=>{
@@ -498,13 +535,13 @@ function renderDetail(){
   const c=active(); const root=document.getElementById('detail'); save();
   const r=computeSchedule(c);
   if(r.error){ root.innerHTML=`<div class="card"><div class="empty">${r.error}，请在上方补齐后查看日程。</div></div>`; return; }
-  const seq=r.seq, m=milestones(seq);
+  const seq=r.seq, m=milestones(seq,c.mode);
   const stat=(k,v)=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
   let html=`<div class="summary">${stat('开班',md(m.open))}${stat('结课',md(m.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',m.weeks+' 周')}</div>`;
   html+='<div class="exam-cards">';
-  const ord=c.mode==='full'?['mid','final','bilan']:['mid','final'];
-  ord.forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
-    html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${EXAM[k].name}</div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · ${cc.type==='WJ'?'外教':'中教'}第 ${cc.idx} 堂</div></div>`;});
+  if(m.mid) html+=`<div class="ecard home"><div class="lbl">期中 · 在家完成</div><div class="d">${md(m.mid)}</div><div class="w">${WD_CN[m.mid.getDay()]} · 建议完成日，不占课堂</div></div>`;
+  (c.mode==='full'?['final','bilan']:['final']).forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
+    html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${EXAM[k].name}</div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.no} 次课 · ${cc.type==='WJ'?'外教':'中教'}第 ${cc.idx} 堂</div></div>`;});
   html+='</div>';
   html+=`<div class="card"><div class="chead"><h3>${c.name} · 课程日程</h3>
     <div class="viewtabs" id="viewTabs">
@@ -516,8 +553,9 @@ function renderDetail(){
       <div class="li"><span class="sw" style="background:${TYPES.A0.color}"></span>A0 语音</div>
       <div class="li"><span class="sw" style="background:${TYPES.ZJ.color}"></span>中教 知识</div>
       <div class="li"><span class="sw" style="background:${TYPES.WJ.color}"></span>外教 口语</div>
-      <div class="li"><span class="sw" style="background:${EXAM.mid.color}"></span>期中 / 期末</div>
+      <div class="li"><span class="sw" style="background:${EXAM.final.color}"></span>期末</div>
       <div class="li"><span class="sw" style="background:${EXAM.bilan.color}"></span>Bilan</div>
+      <div class="li"><span class="sw" style="background:#fff3e6;border:1px dashed #e3b478"></span>法定假日</div>
       <div class="li"><span class="sw" style="background:#d24b4b"></span>请假 / 停课</div>
       <div class="li"><span class="sw" style="background:#475569"></span>休假</div>
     </div></div>`;
@@ -533,12 +571,15 @@ function renderViewBody(seq){
   const overlaps=cls.leaves.filter(lv=>+parse(lv.end)>=lo && +parse(lv.start)<=hi);
   const rlabel=lv=>SCOPE[lv.scope]+(KIND[lv.kind]||KIND.leave).name;
   const rrange=(lv,long)=> lv.start===lv.end ? (long?fmt(parse(lv.start)):md(parse(lv.start))) : (long?`${fmt(parse(lv.start))} → ${fmt(parse(lv.end))}`:`${md(parse(lv.start))}~${md(parse(lv.end))}`);
-  const merge=()=>[...byDate.map(c=>({leave:false,c})), ...overlaps.map(lv=>({leave:true,lv,date:parse(lv.start)}))]
-    .sort((a,b)=>{const da=a.leave?a.date:a.c.date, db=b.leave?b.date:b.c.date; return (da-db)||(a.leave?1:-1);});
+  const hols=holidaysInRange(cls,lo,hi);
+  const merge=()=>[...byDate.map(c=>({k:'c',c})), ...overlaps.map(lv=>({k:'lv',lv,date:parse(lv.start)})), ...hols.map(h=>({k:'h',h,date:h.date}))]
+    .sort((a,b)=>{const da=a.k==='c'?a.c.date:a.date, db=b.k==='c'?b.c.date:b.date; return (da-db)||(a.k==='c'?-1:1);});
   if(state.view==='chips'){
     let h='<div class="chips">'; let sep=false;
     merge().forEach(it=>{
-      if(it.leave){ const k=KIND[it.lv.kind]||KIND.leave;
+      if(it.k==='h'){
+        h+=`<span class="chip hchip" title="${esc(it.h.name)}"><span class="cn">${esc(it.h.name.split(' ')[0])}</span><span class="cd">${md(it.h.date)} ${SCOPE[it.h.scope]}</span></span>`; return; }
+      if(it.k==='lv'){ const k=KIND[it.lv.kind]||KIND.leave;
         h+=`<span class="chip lchip" style="background:${k.bg};color:${k.color};border-color:${k.border}"><span class="cn">${rlabel(it.lv)}</span><span class="cd">${rrange(it.lv)}</span></span>`; return; }
       const c=it.c; if(active().a0!==false&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
       h+=`<span class="chip" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}</span></span>`;});
@@ -546,7 +587,9 @@ function renderViewBody(seq){
   } else if(state.view==='table'){
     let h='<div class="tblwrap"><table><thead><tr><th>#</th><th>日期</th><th>星期</th><th>科目</th><th>本科第几堂</th><th>备注</th></tr></thead><tbody>'; let n=0;
     merge().forEach(it=>{
-      if(it.leave){ const lv=it.lv, k=KIND[lv.kind]||KIND.leave; const single=lv.start===lv.end;
+      if(it.k==='h'){ const hd=it.h;
+        h+=`<tr class="lrow holiday"><td></td><td class="n">${fmt(hd.date)}</td><td>${WD_CN[hd.date.getDay()]}</td><td class="lcell" colspan="3">📅 法定假日 · ${esc(hd.name)} · ${SCOPE[hd.scope]}停课顺延</td></tr>`; return; }
+      if(it.k==='lv'){ const lv=it.lv, k=KIND[lv.kind]||KIND.leave; const single=lv.start===lv.end;
         h+=`<tr class="lrow ${lv.kind}"><td></td><td class="n">${rrange(lv,true)}</td><td>${single?WD_CN[parse(lv.start).getDay()]:'—'}</td><td class="lcell" colspan="3">${k.icon} ${rlabel(lv)} · 期间顺延</td></tr>`; return; }
       const c=it.c; n++; const cl=c.exam==='bilan'?'bilan':(c.exam?'exam':'');
       const tn=c.type==='A0'?'A0 语音':(c.type==='ZJ'?'中教':'外教');
@@ -574,8 +617,9 @@ function renderCalendar(seq){
       if(lvs&&!isHol){ if(lvs.some(x=>x.kind==='vacation'))cc+=' vac'; if(lvs.some(x=>x.kind==='leave'))cc+=' leave'; }
       if(cs){cc+=' has'; if(cs.some(c=>c.exam==='bilan'))cc+=' bil'; else if(cs.some(c=>c.exam))cc+=' exam';}
       let dots=''; if(cs)cs.forEach(c=>dots+=`<span class="cdot" style="background:${chipColor(c)}"></span>`);
-      let ltag=''; if(lvs){const set=[...new Set(lvs.map(x=>calTag(x.kind,x.scope)))]; const col=lvs.every(x=>x.kind==='vacation')?'#475569':'#c0392b'; ltag=`<span class="ltag" style="color:${col}">${set.join(' ')}</span>`;}
-      h+=`<div class="${cc}"><span class="dd">${dn}</span>${ltag}<span class="cdots">${dots}</span></div>`;}
+      let ltag=''; if(lvs&&!isHol){const set=[...new Set(lvs.map(x=>calTag(x.kind,x.scope)))]; const col=lvs.every(x=>x.kind==='vacation')?'#475569':'#c0392b'; ltag=`<span class="ltag" style="color:${col}">${set.join(' ')}</span>`;}
+      if(isHol){ const hn=holidayName(ds).split(' ')[0]; ltag=`<span class="htag" title="${esc(holidayName(ds))}">${esc(hn)}</span>`; }
+      h+=`<div class="${cc}"${isHol?` title="${esc(holidayName(ds))}"`:''}><span class="dd">${dn}</span>${ltag}<span class="cdots">${dots}</span></div>`;}
     h+='</div></div>';});
   return h+'</div>';
 }
@@ -583,11 +627,11 @@ function renderCalendar(seq){
 /* ---------- 渲染：汇总总览 ---------- */
 function renderOverview(){
   const t=document.getElementById('ovTable');
-  let h='<thead><tr><th>班级</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中</th><th>期末</th><th>Bilan</th><th>结课</th><th>周数</th></tr></thead><tbody>';
+  let h='<thead><tr><th>班级</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中(在家)</th><th>期末</th><th>Bilan</th><th>结课</th><th>周数</th></tr></thead><tbody>';
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
-    const m=milestones(r.seq);
+    const m=milestones(r.seq,c.mode);
     const wd=d=>d?`${md(d)} ${WD_CN[d.getDay()]}`:'—';
     h+=`<tr><td><b>${esc(c.name)}</b></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}</td><td class="n fin">${wd(m.final)}</td><td class="n bil">${wd(m.bilan)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
   });
@@ -597,12 +641,12 @@ const esc=s=>String(s).replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 
 /* ---------- 复制 / 导出 ---------- */
 function ovTSV(){
-  const head=['班级','班型','开班','A0完成','期中','期末','Bilan','结课','周数'];
+  const head=['班级','班型','开班','A0完成','期中(在家·建议)','期末','Bilan','结课','周数'];
   const rows=[head.join('\t')];
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     if(r.error){ rows.push([c.name,mt,r.error,'','','','','',''].join('\t')); return; }
-    const m=milestones(r.seq); const f=d=>d?fmt(d):'';
+    const m=milestones(r.seq,c.mode); const f=d=>d?fmt(d):'';
     rows.push([c.name,mt,f(m.open),f(m.a0),f(m.mid),f(m.final),f(m.bilan),f(m.close),m.weeks].join('\t'));
   });
   return rows.join('\n');
@@ -615,10 +659,13 @@ function detailTSV(){
     const bd=[...r.seq].sort((a,b)=>a.date-b.date);
     const lo=Math.min(...bd.map(x=>+x.date)), hi=Math.max(...bd.map(x=>+x.date));
     const overlaps=c.leaves.filter(lv=>+parse(lv.end)>=lo && +parse(lv.start)<=hi);
-    const items=[...bd.map(x=>({leave:false,x})), ...overlaps.map(lv=>({leave:true,lv,date:parse(lv.start)}))]
-      .sort((a,b)=>{const da=a.leave?a.date:a.x.date, db=b.leave?b.date:b.x.date; return (da-db)||(a.leave?1:-1);});
+    const hols=holidaysInRange(c,lo,hi);
+    const items=[...bd.map(x=>({leave:false,x})), ...overlaps.map(lv=>({leave:true,lv,date:parse(lv.start)})), ...hols.map(h=>({hol:true,h,date:h.date}))]
+      .sort((a,b)=>{const da=(a.leave||a.hol)?a.date:a.x.date, db=(b.leave||b.hol)?b.date:b.x.date; return (da-db)||((a.leave||a.hol)?1:-1);});
     let n=0;
     items.forEach(it=>{
+      if(it.hol){ const hd=it.h;
+        rows.push([c.name,mt,'',fmt(hd.date),WD_CN[hd.date.getDay()],'—','','法定假日 · '+hd.name+' · '+SCOPE[hd.scope]+'停课顺延'].join('\t')); return; }
       if(it.leave){ const lv=it.lv, k=KIND[lv.kind]||KIND.leave; const single=lv.start===lv.end;
         const dcol=single?fmt(parse(lv.start)):`${fmt(parse(lv.start))}→${fmt(parse(lv.end))}`;
         rows.push([c.name,mt,'',dcol,single?WD_CN[parse(lv.start).getDay()]:'—','—','',SCOPE[lv.scope]+k.name+' · 顺延'].join('\t')); return; }
