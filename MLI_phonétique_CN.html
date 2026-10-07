@@ -347,6 +347,8 @@ footer{border-top:1px solid var(--line);margin-top:40px;padding-top:12px;font-si
     if (!voices.length) { sel.innerHTML = '<option value="">（系统预设）</option>'; if (synth.getVoices().length) showWarn('此装置没有安装法语语音，发音可能不准确。可在系统设置中加入法语（法国或加拿大）语音后重新整理页面。'); return; }
     warn.classList.remove('show');
     voices.sort(function(a,b){ var s = function(v){ return (/fr[-_]FR/i.test(v.lang)?0:/fr[-_]CA/i.test(v.lang)?1:2); }; return s(a)-s(b); });
+    var dan = voices.filter(function(v){ return /daniel/i.test(v.name); });
+    if (dan.length) { voices = [dan[0]]; sel.innerHTML = '<option value="0">' + dan[0].name.replace(/</g,'') + '</option>'; sel.value = 0; sel.disabled = true; return; }
     sel.innerHTML = voices.map(function(v,i){ return '<option value="'+i+'">'+v.name.replace(/</g,'')+' ('+v.lang+')</option>'; }).join('');
     if (saved) { var k = voices.findIndex(function(v){ return v.name === saved; }); if (k >= 0) sel.value = k; }
   }
