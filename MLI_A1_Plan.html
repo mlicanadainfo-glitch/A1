@@ -31,6 +31,7 @@
 
   .grid{display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .grid>*{min-width:0}
 
   .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow)}
   .panel .pad{padding:16px}
@@ -75,6 +76,15 @@
   .yeartabs button{flex:1; border:1px solid var(--line); background:#fff; border-radius:8px; padding:6px; font:inherit; font-weight:700; font-size:13px; color:var(--muted); cursor:pointer}
   .yeartabs button.on{background:var(--brand); border-color:var(--brand); color:#fff}
   .addhol{display:grid; grid-template-columns:116px 1fr 40px; gap:6px; margin-top:10px}
+  .addhol select{grid-column:1 / -1; padding:8px 9px}
+  .clsitem .nm{min-width:0}
+  .rpill{font-size:11px; font-weight:800; padding:2px 8px; border-radius:20px; flex:none; color:#fff; letter-spacing:.5px}
+  .rpill.east{background:#2E6FB7} .rpill.west{background:#C2571F}
+  .hol .rg{font-size:10.5px; font-weight:800; padding:1px 6px; border-radius:20px; flex:none; color:#fff}
+  .hol .rg.west{background:#C2571F} .hol .rg.east{background:#2E6FB7}
+  .regionrow{margin-bottom:14px}
+  .regionrow .seg button.on.east{background:#2E6FB7; color:#fff}
+  .regionrow .seg button.on.west{background:#C2571F; color:#fff}
   .addhol input{padding:8px 9px}
   .hol .hdel{margin-left:2px; color:var(--danger); font-weight:800; cursor:pointer; padding:0 3px; opacity:.55; flex:none}
   .hol .hdel:hover{opacity:1}
@@ -222,7 +232,7 @@
         </div></div>
 
         <div class="panel" style="margin-top:16px"><div class="pad">
-          <h2>校历 · 法定假日（全部班级共用）</h2>
+          <h2>校历 · 法定假日</h2>
           <div class="yeartabs" id="yearTabs">
             <button data-year="2026" class="on">2026</button>
             <button data-year="2027">2027</button>
@@ -236,8 +246,9 @@
             <input type="date" id="chDate">
             <input type="text" id="chName" placeholder="假日名称（如 BC Day）">
             <button class="btn sm" id="chAdd">＋</button>
+            <select id="chRegion"><option value="all">适用：全部班级</option><option value="west">适用：仅加西</option><option value="east">适用：仅加东</option></select>
           </div>
-          <p class="note">自定义假日对全部班级生效，可勾选停用或用 × 删除。BC 省等额外假日直接加在这里。</p>
+          <p class="note">没有标签的假日全部班级都放；标「加西」的只有加西班放（如 9/30 真相与和解日、11/11 国殇日），标「加东」的只有加东班放。可勾选停用或用 × 删除。</p>
         </div></div>
       </aside>
 
@@ -307,9 +318,10 @@ function midSuggest(seq,mode){
 }
 
 /* ---------- 假日 ---------- */
+const REGION={east:{name:'加东'},west:{name:'加西'}};
 const HOLIDAYS={
-  2026:[['2026-01-01','元旦 Jour de l\'An'],['2026-02-16','家庭日 Jour de la famille'],['2026-04-03','耶稣受难日 Vendredi saint'],['2026-05-18','爱国者日 Journée des patriotes'],['2026-06-24','魁北克国庆 Saint-Jean-Baptiste'],['2026-07-01','加拿大国庆 Fête du Canada'],['2026-09-07','劳动节 Fête du Travail'],['2026-10-12','感恩节 Action de grâce'],['2026-12-25','圣诞节 Noël'],['2026-12-26','圣诞假 Congé de Noël'],['2026-12-28','圣诞假 Congé de Noël']],
-  2027:[['2027-01-01','元旦 Jour de l\'An'],['2027-02-15','家庭日 Family Day'],['2027-03-26','耶稣受难日 Vendredi saint'],['2027-05-24','维多利亚日 Fête de la Reine'],['2027-06-24','圣让-巴蒂斯特 Saint-Jean-Baptiste'],['2027-07-01','加拿大国庆 Fête du Canada'],['2027-08-02','公民日 Congé civique'],['2027-09-06','劳动节 Fête du Travail'],['2027-10-11','感恩节 Action de grâce'],['2027-12-24','平安夜 Noël'],['2027-12-25','圣诞节 Noël']],
+  2026:[['2026-01-01','元旦 Jour de l\'An'],['2026-02-16','家庭日 Jour de la famille'],['2026-04-03','耶稣受难日 Vendredi saint'],['2026-05-18','爱国者日 Journée des patriotes'],['2026-06-24','魁北克国庆 Saint-Jean-Baptiste'],['2026-07-01','加拿大国庆 Fête du Canada'],['2026-09-07','劳动节 Fête du Travail'],['2026-09-30','真相与和解日 Truth and Reconciliation','west'],['2026-10-12','感恩节 Action de grâce'],['2026-11-11','国殇日 Remembrance Day','west'],['2026-12-25','圣诞节 Noël'],['2026-12-26','圣诞假 Congé de Noël'],['2026-12-28','圣诞假 Congé de Noël']],
+  2027:[['2027-01-01','元旦 Jour de l\'An'],['2027-02-15','家庭日 Family Day'],['2027-03-26','耶稣受难日 Vendredi saint'],['2027-05-24','维多利亚日 Fête de la Reine'],['2027-06-24','圣让-巴蒂斯特 Saint-Jean-Baptiste'],['2027-07-01','加拿大国庆 Fête du Canada'],['2027-08-02','公民日 Congé civique'],['2027-09-06','劳动节 Fête du Travail'],['2027-09-30','真相与和解日 Truth and Reconciliation','west'],['2027-10-11','感恩节 Action de grâce'],['2027-11-11','国殇日 Remembrance Day','west'],['2027-12-24','平安夜 Noël'],['2027-12-25','圣诞节 Noël']],
 };
 
 /* ---------- 状态 ---------- */
@@ -318,18 +330,18 @@ const WD_CN=['周日','周一','周二','周三','周四','周五','周六'];
 let CID=0;
 function newClass(){
   CID++;
-  return {id:CID, name:'班级 '+CID, mode:'full', start:'', a0:true,
+  return {id:CID, name:'班级 '+CID, region:'east', mode:'full', start:'', a0:true,
     days:{A0:[1,2,3,4,5],ZJ:[1,2,3,4,5],WJ:[1,2,3,4,5]},
     perDay:{A0:1,ZJ:1,WJ:1}, leaves:[]};
 }
 const state={ holEnabled:new Set(), custom:[], classes:[], activeId:null, tab:'setup', year:2026, view:'chips' };
 Object.values(HOLIDAYS).flat().forEach(([d])=>state.holEnabled.add(d));
 const LSKEY='mli_scheduler_v1';
-const HOL_VERSION=2;                            // 每次新增预载假日就 +1
-const HOL_NEW={2:['2026-12-26','2026-12-28']};  // 各版本新增、对老用户自动开启
+const HOL_VERSION=3;                            // 每次新增预载假日就 +1
+const HOL_NEW={2:['2026-12-26','2026-12-28'],3:['2026-09-30','2026-11-11','2027-09-30','2027-11-11']};  // 各版本新增、对老用户自动开启
 function snapshot(){ return {v:1,holVer:HOL_VERSION,CID,activeId:state.activeId,year:state.year,holEnabled:[...state.holEnabled],custom:state.custom,classes:state.classes}; }
 function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(snapshot())); }catch(e){} }
-function migrateLeaves(c){ if(c.a0===undefined)c.a0=true; c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
+function migrateLeaves(c){ if(c.a0===undefined)c.a0=true; if(c.region!=='west')c.region='east'; c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
 function restore(d){ if(!d||!d.classes||!d.classes.length) return false;
   state.classes=d.classes.map(migrateLeaves); state.activeId=d.activeId||d.classes[0].id;
   state.holEnabled=new Set(d.holEnabled||[]); state.custom=d.custom||[]; state.year=d.year||2026;
@@ -345,8 +357,18 @@ const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const md=d=>`${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const parse=s=>{const[y,m,dd]=s.split('-').map(Number);return new Date(y,m-1,dd);};
 
+/* 假日适用地区：'all' 全部班级 / 'west' 仅加西 / 'east' 仅加东 */
+function holRegion(ds){
+  const y=+ds.slice(0,4);
+  const pre=(HOLIDAYS[y]||[]).find(([d])=>d===ds); if(pre) return pre[2]||'all';
+  const cu=state.custom.find(h=>h.date===ds); return (cu&&cu.region)||'all';
+}
+function holApplies(ds,cls){
+  if(!state.holEnabled.has(ds)) return false;
+  const r=holRegion(ds); return r==='all' || r===(cls.region||'east');
+}
 function isBlocked(ds,type,cls){
-  if(state.holEnabled.has(ds)) return true;
+  if(holApplies(ds,cls)) return true;
   for(const lv of cls.leaves){
     if(ds<lv.start||ds>lv.end) continue;
     if(lv.scope==='all') return true;
@@ -432,7 +454,7 @@ function renderClassList(){
     const el=document.createElement('div');
     el.className='clsitem'+(c.id===state.activeId?' on':'');
     const mt=c.mode==='full'?'全日制':'兼读制';
-    el.innerHTML=`<span class="nm">${c.name}</span><span class="st">${c.start?md(parse(c.start)):'未设'}</span><span class="mt">${mt}</span><span class="del">×</span>`;
+    el.innerHTML=`<span class="rpill ${c.region||'east'}">${REGION[c.region||'east'].name}</span><span class="nm">${c.name}</span><span class="st">${c.start?md(parse(c.start)):'未设'}</span><span class="mt">${mt}</span><span class="del">×</span>`;
     el.onclick=e=>{ if(e.target.classList.contains('del')) return; state.activeId=c.id; renderAll(); };
     el.querySelector('.del').onclick=()=>{
       if(state.classes.length===1){ toast('至少保留一个班级'); return; }
@@ -450,6 +472,13 @@ function renderEditor(){
   box.innerHTML=`
     <div class="editor-head">
       <input type="text" id="clsName" value="${c.name.replace(/"/g,'&quot;')}">
+    </div>
+    <div class="regionrow"><label class="field">地区（先选）</label>
+      <div class="seg" id="clsRegion">
+        <button data-r="east" class="east${c.region!=='west'?' on':''}">加东</button>
+        <button data-r="west" class="west${c.region==='west'?' on':''}">加西</button>
+      </div>
+      <p class="note">${c.region==='west'?'加西班：除共用假日外，另跳过标「加西」的假日（9/30 真相与和解日、11/11 国殇日）。':'加东班：只跳过共用假日与标「加东」的假日。'}</p>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div><label class="field">开班日期</label><input type="date" id="clsStart" value="${c.start}"></div>
@@ -481,6 +510,7 @@ function renderEditor(){
     </div>`;
 
   document.getElementById('clsName').oninput=e=>{c.name=e.target.value||('班级 '+c.id); renderClassList(); save();};
+  box.querySelectorAll('#clsRegion button').forEach(b=>b.onclick=()=>{c.region=b.dataset.r; renderClassList(); renderEditor(); renderDetail();});
   document.getElementById('clsStart').onchange=e=>{c.start=e.target.value; renderClassList(); renderDetail();};
   box.querySelectorAll('#clsMode button').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode; renderClassList(); renderEditor(); renderDetail();});
   document.getElementById('clsA0').onchange=e=>{c.a0=e.target.checked; renderEditor(); renderDetail();};
@@ -529,8 +559,8 @@ function renderLeaves(c){
 
 /* ---------- 渲染：假日 ---------- */
 function holsForYear(y){
-  const pre=(HOLIDAYS[y]||[]).map(([d,n])=>[d,n,false]);
-  const cus=state.custom.filter(h=>h.date.startsWith(y+'-')).map(h=>[h.date,h.name,true]);
+  const pre=(HOLIDAYS[y]||[]).map(([d,n,r])=>[d,n,false,r||'all']);
+  const cus=state.custom.filter(h=>h.date.startsWith(y+'-')).map(h=>[h.date,h.name,true,h.region||'all']);
   return [...pre,...cus].sort((a,b)=>a[0]<b[0]?-1:1);
 }
 function holidayName(ds){
@@ -542,6 +572,7 @@ function holidayName(ds){
 function holidaysInRange(cls,lo,hi){
   const kinds = cls.a0!==false?['A0','ZJ','WJ']:['ZJ','WJ'];
   return [...state.holEnabled].sort().map(ds=>{
+    if(!holApplies(ds,cls)) return null;
     const d=parse(ds), t=+d; if(t<lo||t>hi) return null;
     const hit=kinds.filter(k=>cls.days[k].includes(d.getDay()));
     if(!hit.length) return null;
@@ -551,10 +582,10 @@ function holidaysInRange(cls,lo,hi){
 }
 function renderHolidays(){
   const list=document.getElementById('holList'); list.innerHTML='';
-  holsForYear(state.year).forEach(([d,name,custom])=>{
+  holsForYear(state.year).forEach(([d,name,custom,rg])=>{
     const on=state.holEnabled.has(d); const dd=parse(d);
     const el=document.createElement('div'); el.className='hol'+(on?' on':'');
-    el.innerHTML=`<span class="chk">${on?'✓':''}</span><span class="hdate">${d.slice(5)} ${WD_CN[dd.getDay()]}</span><span class="hname">${esc(name)}</span>${custom?'<span class="hdel" title="删除">×</span>':''}`;
+    el.innerHTML=`<span class="chk">${on?'✓':''}</span><span class="hdate">${d.slice(5)} ${WD_CN[dd.getDay()]}</span><span class="hname">${esc(name)}</span>${rg!=='all'?`<span class="rg ${rg}">${REGION[rg].name}</span>`:''}${custom?'<span class="hdel" title="删除">×</span>':''}`;
     el.onclick=()=>{ if(state.holEnabled.has(d))state.holEnabled.delete(d);else state.holEnabled.add(d); renderHolidays(); renderDetail(); };
     if(custom) el.querySelector('.hdel').onclick=ev=>{ ev.stopPropagation(); state.custom=state.custom.filter(h=>h.date!==d); state.holEnabled.delete(d); renderHolidays(); renderDetail(); };
     list.appendChild(el);
@@ -583,7 +614,7 @@ function renderDetail(){
     const ds=r.lateWJ.map(x=>`外教第 ${x.idx} 堂 ${md(x.date)}`).join('、');
     html+=`<div class="warnbar">⚠ 期末（${md(m.final)}）之后外教还剩 ${r.lateWJ.length} 堂：${ds}。请决定改期、并堂，或当作考后口语课。</div>`;
   }
-  html+=`<div class="card"><div class="chead"><h3>${c.name} · 课程日程</h3>
+  html+=`<div class="card"><div class="chead"><h3>${esc(c.name)} · ${REGION[c.region||'east'].name} · 课程日程</h3>
     <div class="viewtabs" id="viewTabs">
       <button data-v="chips"${state.view==='chips'?' class="on"':''}>节奏条</button>
       <button data-v="table"${state.view==='table'?' class="on"':''}>明细表</button>
@@ -652,7 +683,7 @@ function renderCalendar(seq){
     ['一','二','三','四','五','六','日'].forEach(w=>h+=`<div class="wd">${w}</div>`);
     let lead=(new Date(y,mon,1).getDay()+6)%7; for(let i=0;i<lead;i++)h+='<div></div>';
     const dim=new Date(y,mon+1,0).getDate();
-    for(let dn=1;dn<=dim;dn++){const ds=`${y}-${pad(mon+1)}-${pad(dn)}`; const cs=byDate[ds]; const isHol=state.holEnabled.has(ds); const lvs=leaveMap[ds];
+    for(let dn=1;dn<=dim;dn++){const ds=`${y}-${pad(mon+1)}-${pad(dn)}`; const cs=byDate[ds]; const isHol=holApplies(ds,cls); const lvs=leaveMap[ds];
       let cc='cell'; if(isHol)cc+=' hol';
       if(lvs&&!isHol){ if(lvs.some(x=>x.kind==='vacation'))cc+=' vac'; if(lvs.some(x=>x.kind==='leave'))cc+=' leave'; }
       if(cs){cc+=' has'; if(cs.some(c=>c.exam==='bilan'))cc+=' bil'; else if(cs.some(c=>c.exam))cc+=' exam';}
@@ -667,14 +698,15 @@ function renderCalendar(seq){
 /* ---------- 渲染：汇总总览 ---------- */
 function renderOverview(){
   const t=document.getElementById('ovTable');
-  let h='<thead><tr><th>班级</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中(在家)</th><th>期末</th><th>Bilan</th><th>结课</th><th>周数</th></tr></thead><tbody>';
+  let h='<thead><tr><th>班级</th><th>地区</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中(在家)</th><th>期末</th><th>Bilan</th><th>结课</th><th>周数</th></tr></thead><tbody>';
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
-    if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
+    const rn=REGION[c.region||'east'].name;
+    if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${rn}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
     const m=milestones(r.seq,c.mode);
     const wd=d=>d?`${md(d)} ${WD_CN[d.getDay()]}`:'—';
     const wdby=(d,by)=>d?`${wd(d)} <span class="by-i">${by}考</span>`:'—';
-    h+=`<tr><td><b>${esc(c.name)}</b></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}${m.mid?' <span class="by-i">在家</span>':''}</td><td class="n fin">${wdby(m.final,m.finalBy)}</td><td class="n bil">${wdby(m.bilan,m.bilanBy)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
+    h+=`<tr><td><b>${esc(c.name)}</b></td><td><span class="rpill ${c.region||'east'}">${rn}</span></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}${m.mid?' <span class="by-i">在家</span>':''}</td><td class="n fin">${wdby(m.final,m.finalBy)}</td><td class="n bil">${wdby(m.bilan,m.bilanBy)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
   });
   t.innerHTML=h+'</tbody>';
 }
@@ -682,22 +714,24 @@ const esc=s=>String(s).replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 
 /* ---------- 复制 / 导出 ---------- */
 function ovTSV(){
-  const head=['班级','班型','开班','A0完成','期中(在家·建议)','期末','Bilan','结课','周数'];
+  const head=['班级','地区','班型','开班','A0完成','期中(在家·建议)','期末','Bilan','结课','周数'];
   const rows=[head.join('\t')];
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
-    if(r.error){ rows.push([c.name,mt,r.error,'','','','','',''].join('\t')); return; }
+    const rn=REGION[c.region||'east'].name;
+    if(r.error){ rows.push([c.name,rn,mt,r.error,'','','','','',''].join('\t')); return; }
     const m=milestones(r.seq,c.mode); const f=d=>d?fmt(d):'';
     const fb=(d,by)=>d?fmt(d)+'（'+by+'考）':'';
-    rows.push([c.name,mt,f(m.open),f(m.a0),f(m.mid),fb(m.final,m.finalBy),fb(m.bilan,m.bilanBy),f(m.close),m.weeks].join('\t'));
+    rows.push([c.name,rn,mt,f(m.open),f(m.a0),f(m.mid),fb(m.final,m.finalBy),fb(m.bilan,m.bilanBy),f(m.close),m.weeks].join('\t'));
   });
   return rows.join('\n');
 }
 function detailTSV(){
-  const rows=[['班级','班型','序号','日期','星期','科目','本科第几堂','备注'].join('\t')];
+  const rows=[['班级','地区','班型','序号','日期','星期','科目','本科第几堂','备注'].join('\t')];
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
-    if(r.error){ rows.push([c.name,mt,'',r.error,'','','',''].join('\t')); return; }
+    const rn=REGION[c.region||'east'].name;
+    if(r.error){ rows.push([c.name,rn,mt,'',r.error,'','','',''].join('\t')); return; }
     const bd=[...r.seq].sort((a,b)=>a.date-b.date);
     const lo=Math.min(...bd.map(x=>+x.date)), hi=Math.max(...bd.map(x=>+x.date));
     const overlaps=c.leaves.filter(lv=>+parse(lv.end)>=lo && +parse(lv.start)<=hi);
@@ -707,12 +741,12 @@ function detailTSV(){
     let n=0;
     items.forEach(it=>{
       if(it.hol){ const hd=it.h;
-        rows.push([c.name,mt,'',fmt(hd.date),WD_CN[hd.date.getDay()],'—','','法定假日 · '+hd.name+' · '+SCOPE[hd.scope]+'停课顺延'].join('\t')); return; }
+        rows.push([c.name,rn,mt,'',fmt(hd.date),WD_CN[hd.date.getDay()],'—','','法定假日 · '+hd.name+' · '+SCOPE[hd.scope]+'停课顺延'].join('\t')); return; }
       if(it.leave){ const lv=it.lv, k=KIND[lv.kind]||KIND.leave; const single=lv.start===lv.end;
         const dcol=single?fmt(parse(lv.start)):`${fmt(parse(lv.start))}→${fmt(parse(lv.end))}`;
-        rows.push([c.name,mt,'',dcol,single?WD_CN[parse(lv.start).getDay()]:'—','—','',SCOPE[lv.scope]+k.name+' · 顺延'].join('\t')); return; }
+        rows.push([c.name,rn,mt,'',dcol,single?WD_CN[parse(lv.start).getDay()]:'—','—','',SCOPE[lv.scope]+k.name+' · 顺延'].join('\t')); return; }
       const x=it.x; n++; const tn=x.type==='A0'?'A0语音':(x.type==='ZJ'?'中教':'外教');
-      rows.push([c.name,mt,n,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',x.exam?EXAM[x.exam].name+' · '+tn+'考':''].join('\t'));
+      rows.push([c.name,rn,mt,n,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',x.exam?EXAM[x.exam].name+' · '+tn+'考':''].join('\t'));
     });
   });
   return rows.join('\n');
@@ -755,7 +789,8 @@ document.getElementById('holNone').onclick=()=>{holsForYear(state.year).forEach(
 document.getElementById('chAdd').onclick=()=>{
   const d=document.getElementById('chDate').value; const nm=(document.getElementById('chName').value||'').trim()||'自定义假日';
   if(!d){toast('请选择假日日期');return;}
-  if(!state.custom.some(h=>h.date===d)) state.custom.push({date:d,name:nm});
+  const rg=document.getElementById('chRegion').value||'all';
+  if(!state.custom.some(h=>h.date===d)) state.custom.push({date:d,name:nm,region:rg});
   state.holEnabled.add(d);
   const y=+d.slice(0,4); if(y===2026||y===2027){ state.year=y; syncYearTabs(); }
   document.getElementById('chDate').value=''; document.getElementById('chName').value='';
