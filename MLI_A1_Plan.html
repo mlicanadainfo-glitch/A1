@@ -313,12 +313,12 @@ function buildSequence(mode, withA0=true, a0n=3, a0wj=false){
 const A2_MID_DECK=7, A2_ZJ={full:20, part:21}, A2_WJ={full:13, part:11}, A2_REV=3;
 /* 外教课件：全日制 L1–L13 依序；兼读制 11 堂 L1–L11（L1、L2 是开场复习，L3 起回收中教）；兼读制中21＝复习中19–20 + TCF（C21），中22＝TCF 听力阅读专练，无 Bilan */
 const WJ_DECK={full:[1,2,3,4,5,6,7,8,9,10,11,12,13], part:[1,2,3,4,5,6,7,8,9,10,11]};
-const DECK_T={1:'Se présenter',2:'Objets et lieux',3:'Ma semaine',4:'Sorties en famille',5:'Avant et demain',6:'Récits et métiers',7:'Plus vert, plus poli',8:'Météo et sorties',9:'Embauche et magasinage',10:'Au bureau',11:'Maison et santé',12:'Révision et TCF',13:'Bilan A2'};
-const DECK_R={1:'开场复习',2:'开场复习',3:'回收中1–2',4:'回收中3–4',5:'回收中5–6',6:'回收中7–8',7:'回收中9–10',8:'回收中11–12',9:'回收中13–14',10:'回收中15',11:'回收中16–18',12:'复习中19–20 + TCF',13:'Bilan 总测'};
+const DECK_T={1:'Se présenter',2:'Objets et lieux',3:'Ma semaine',4:'Sorties en famille',5:'Avant et demain',6:'Récits et métiers',7:'Plus vert, plus poli',8:'Météo et sorties',9:'Embauche et magasinage',10:'Au bureau',11:'Maison et planète',12:'Santé et vacances',13:'Bilan A2'};
+const DECK_R={1:'开场复习',2:'开场复习',3:'回收中1–2',4:'回收中3–4',5:'回收中5–6',6:'回收中7–8',7:'回收中9–10',8:'回收中11–12',9:'回收中13–14',10:'回收中15',11:'回收中16–17',12:'回收中18–19',13:'Bilan 总测'};
 /* 兼读制中教 22 堂：Leçon 1–20 + 复习中19–20 + TCF（C21）+ TCF 听力阅读专练（全日制同一份当作业） */
 const PT_ZJ={21:'复习中19–20 + TCF（A2_C21）'};
 const lessonToSess=(n,mode)=>n;
-const DECK_NEED={3:2,4:4,5:6,6:8,7:10,8:12,9:14,10:15,11:18,12:20,13:20};
+const DECK_NEED={3:2,4:4,5:6,6:8,7:10,8:12,9:14,10:15,11:17,12:19,13:20};
 function buildSequenceA2(mode){
   const s=[]; let zj=0,wj=0; const W=A2_WJ[mode]||A2_WJ.part, Z=A2_ZJ[mode]||A2_ZJ.part;
   const nz=mode==='full'?3:2, nw=mode==='full'?2:1;
@@ -594,7 +594,7 @@ function renderEditor(){
       <div id="leaveList" style="margin-top:8px"></div>
     </div>`;
 
-  document.getElementById('clsName').oninput=e=>{c.name=e.target.value||('班级 '+c.id); renderClassList(); save();};
+  document.getElementById('clsName').oninput=e=>{c.name=e.target.value||('班级 '+c.id); renderClassList(); renderDetail();};
   box.querySelectorAll('#clsRegion button').forEach(b=>b.onclick=()=>{c.region=b.dataset.r; renderClassList(); renderEditor(); renderDetail();});
   document.getElementById('clsStart').onchange=e=>{c.start=e.target.value; renderClassList(); renderDetail();};
   box.querySelectorAll('#clsMode button').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode; renderClassList(); renderEditor(); renderDetail();});
@@ -659,12 +659,12 @@ function holidayName(ds){
   const cu=state.custom.find(h=>h.date===ds); return cu?cu.name:'假日';
 }
 /* 落在开班~结课之间、且压到该班上课日的法定假日——用来解释「为什么外教走得慢」 */
-function holidaysInRange(cls,lo,hi){
+function holidaysInRange(cls,lo,hi,a0end){
   const kinds = (!isA2(cls)&&cls.a0!==false)?['A0','ZJ','WJ']:['ZJ','WJ'];
   return [...state.holEnabled].sort().map(ds=>{
     if(!holApplies(ds,cls)) return null;
     const d=parse(ds), t=+d; if(t<lo||t>hi) return null;
-    const hit=kinds.filter(k=>cls.days[k].includes(d.getDay()));
+    const hit=kinds.filter(k=>cls.days[k].includes(d.getDay())&&!(k==='A0'&&a0end!==undefined&&t>a0end));
     if(!hit.length) return null;
     const zj=hit.includes('ZJ')||hit.includes('A0'), wj=hit.includes('WJ');
     return {date:d, ds, name:holidayName(ds), scope: zj&&wj?'all':(zj?'ZJ':'WJ')};
@@ -706,12 +706,15 @@ function startAdvice(c){
 }
 function renderDetail(){
   const c=active(); const root=document.getElementById('detail'); save();
-  const r=computeSchedule(c);
+  let r=computeSchedule(c);
   if(r.error){ root.innerHTML=`<div class="card"><div class="empty">${r.error}，请在上方补齐后查看日程。</div></div>`; return; }
-  const seq=r.seq, ST=stagesOf(c,r);
+  let seq=r.seq, ST=stagesOf(c,r);
+  const isCombo=!!r.combo, SV=isCombo?(state.sv||'all'):'all';
+  if(SV!=='all'){ ST=ST.filter(t=>t.lv===SV); seq=ST[0].seq;
+    r={...r, combo:false, early:SV==='A2'?r.early:[], lateWJ:SV==='A1'?r.lateWJ:r.lateWJ2, lateWJ2:[]}; }
   const all=milestones(seq,c.mode,ST[0].lv), MS=ST.map(t=>milestones(t.seq,c.mode,t.lv)), m=MS[0];
   const stat=(k,v)=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
-  let html=startAdvice(c); html+=r.combo
+  let html=SV==='all'?startAdvice(c):''; html+=r.combo
     ? `<div class="summary">${stat('A1 开班',md(MS[0].open))}${stat('A1 结课',md(MS[0].close))}${stat('A2 开班',md(MS[1].open))}${stat('A2 结课',md(MS[1].close))}</div><div class="tally">A1 + A2 合计 <b>${seq.length}</b> 堂 · 跨越 <b>${all.weeks}</b> 周</div>`
     : `<div class="summary">${stat('开班',md(all.open))}${stat('结课',md(all.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',all.weeks+' 周')}</div>`;
   ST.forEach((t,i)=>{ const mm=MS[i], S=t.seq, A2s=t.lv==='A2', pre=r.combo?t.lv+' ':'';
@@ -733,7 +736,7 @@ function renderDetail(){
   if(r.early&&r.early.length){
     const {x,z}=r.early[0];
     const SS=x.stage?seq.filter(y=>y.stage===x.stage):seq, st0=Math.min(...SS.map(y=>+y.date));
-    const causes=[...holidaysInRange(c,st0,+x.date).filter(h=>h.scope!=='WJ').map(h=>`${esc(h.name.split(' ')[0])} ${md(h.date)}`),
+    const causes=[...holidaysInRange(c,st0,+x.date,0).filter(h=>h.scope!=='WJ').map(h=>`${esc(h.name.split(' ')[0])} ${md(h.date)}`),
       ...c.leaves.filter(l=>l.kind!=='extra'&&l.kind!=='swap'&&l.scope!=='WJ'&&+parse(l.start)<=+x.date&&+parse(l.end)>=st0).map(l=>`${SCOPE[l.scope]}${(KIND[l.kind]||KIND.leave).name} ${md(parse(l.start))}`)];
     const zBefore=SS.filter(y=>y.type==='ZJ'&&!y.exam&&!y.rev&&+y.date<+x.date).length;
     const needN=Math.max(1,z.idx-zBefore);
@@ -755,7 +758,8 @@ function renderDetail(){
   [[r.lateWJ,MS[0]],[r.lateWJ2,MS[1]]].forEach(([L,mm])=>{ if(L&&L.length&&mm){
     const ds=L.map(x=>`外教第 ${x.idx} 堂 ${md(x.date)}`).join('、');
     html+=`<div class="warnbar">⚠ 期末（${md(mm.final)}）之后外教还剩 ${L.length} 堂：${ds}。请决定改期、并堂，或当作考后口语课。</div>`; }});
-  html+=`<div class="card"><div class="chead"><h3>${esc(c.name)} · ${c.level==='A12'?'A1 → A2':(c.level||'A1')} · ${REGION[c.region||'east'].name} · 课程日程</h3>
+  html+=`<div class="card"><div class="chead"><h3>${esc(c.name)} · ${c.level==='A12'?(SV==='all'?'A1 → A2':SV):(c.level||'A1')} · ${REGION[c.region||'east'].name} · 课程日程</h3>
+    ${isCombo?`<div class="viewtabs" id="svTabs" title="只显示其中一段，方便截图">${[['all','A1 + A2'],['A1','只看 A1'],['A2','只看 A2']].map(([k,l])=>`<button data-sv="${k}"${SV===k?' class="on"':''}>${l}</button>`).join('')}</div>`:''}
     <div class="viewtabs" id="viewTabs">
       <button data-v="chips"${state.view==='chips'?' class="on"':''}>节奏条</button>
       <button data-v="table"${state.view==='table'?' class="on"':''}>明细表</button>
@@ -773,6 +777,7 @@ function renderDetail(){
       <div class="li"><span class="sw" style="background:#475569"></span>休假</div>
     </div></div>`;
   root.innerHTML=html;
+  root.querySelectorAll('[data-sv]').forEach(b=>b.onclick=()=>{state.sv=b.dataset.sv; renderDetail();});
   root.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>{FIX[+b.dataset.fix](); renderEditor(); renderDetail(); toast('已加入请假／补课列表，可在上方删除还原');});
   root.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{c.start=b.dataset.st; renderClassList(); renderEditor(); renderDetail();});
   root.querySelectorAll('#viewTabs button').forEach(b=>b.onclick=()=>{state.view=b.dataset.v; renderViewBody(seq);});
@@ -786,7 +791,7 @@ function renderViewBody(seq){
   const overlaps=cls.leaves.filter(lv=>+parse(lv.end)>=lo && +parse(lv.start)<=hi);
   const rlabel=lv=>SCOPE[lv.scope]+(KIND[lv.kind]||KIND.leave).name;
   const rrange=(lv,long)=> lv.start===lv.end ? (long?fmt(parse(lv.start)):md(parse(lv.start))) : (long?`${fmt(parse(lv.start))} → ${fmt(parse(lv.end))}`:`${md(parse(lv.start))}~${md(parse(lv.end))}`);
-  const hols=holidaysInRange(cls,lo,hi);
+  const hols=holidaysInRange(cls,lo,hi,Math.max(0,...seq.filter(x=>x.type==='A0').map(x=>+x.date)));
   const merge=()=>[...byDate.map(c=>({k:'c',c})), ...overlaps.map(lv=>({k:'lv',lv,date:parse(lv.start)})), ...hols.map(h=>({k:'h',h,date:h.date}))]
     .sort((a,b)=>{const da=a.k==='c'?a.c.date:a.date, db=b.k==='c'?b.c.date:b.date; return (da-db)||(a.k==='c'?-1:1);});
   if(state.view==='chips'){
@@ -796,8 +801,8 @@ function renderViewBody(seq){
         h+=`<span class="chip hchip" title="${esc(it.h.name)}"><span class="cn">${esc(it.h.name.split(' ')[0])}</span><span class="cd">${md(it.h.date)} ${SCOPE[it.h.scope]}</span></span>`; return; }
       if(it.k==='lv'){ const k=KIND[it.lv.kind]||KIND.leave;
         h+=`<span class="chip lchip" style="background:${k.bg};color:${k.color};border-color:${k.border}"><span class="cn">${rlabel(it.lv)}</span><span class="cd">${rrange(it.lv)}</span></span>`; return; }
-      const c=it.c; if(!isA2(active())&&active().a0!==false&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
-      if(c.stage===2&&!sep2){h+='<span class="chip sep" style="width:auto;padding:0 8px">A2 ▸</span>'; sep2=true;}
+      const c=it.c; if(!isA2(active())&&active().a0!==false&&seq.some(x=>x.type==='A0')&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
+      if(c.stage===2&&!sep2&&seq.some(x=>x.stage===1)){h+='<span class="chip sep" style="width:auto;padding:0 8px">A2 ▸</span>'; sep2=true;}
       h+=`<span class="chip" title="${esc(content(c))}${c.ahead?' · ⚠ 中教进度还没到':''}" style="background:${chipColor(c)}${c.ahead?';outline:3px solid #d24b4b;outline-offset:2px':''}"><span class="cn">${c.ahead?'⚠':''}${chipLabel(c)}</span><span class="cd">${md(c.date)}${c.exam?' '+teacherOf(c):''}</span></span>`;});
     body.innerHTML=h+'</div>';
   } else if(state.view==='table'){
@@ -880,7 +885,7 @@ function detailTSV(){
     const bd=[...r.seq].sort((a,b)=>a.date-b.date);
     const lo=Math.min(...bd.map(x=>+x.date)), hi=Math.max(...bd.map(x=>+x.date));
     const overlaps=c.leaves.filter(lv=>+parse(lv.end)>=lo && +parse(lv.start)<=hi);
-    const hols=holidaysInRange(c,lo,hi);
+    const hols=holidaysInRange(c,lo,hi,Math.max(0,...bd.filter(x=>x.type==='A0').map(x=>+x.date)));
     const items=[...bd.map(x=>({leave:false,x})), ...overlaps.map(lv=>({leave:true,lv,date:parse(lv.start)})), ...hols.map(h=>({hol:true,h,date:h.date}))]
       .sort((a,b)=>{const da=(a.leave||a.hol)?a.date:a.x.date, db=(b.leave||b.hol)?b.date:b.x.date; return (da-db)||((a.leave||a.hol)?1:-1);});
     let n=0;
