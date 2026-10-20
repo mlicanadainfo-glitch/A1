@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MLI 排课计算器</title>
+<title>MLI A1·A2 排课计算器</title>
 <style>
   :root{
     --a0:#8257C4; --zj:#2FA07A; --wj:#3B9AD9; --exam:#E0901C; --bilan:#9B2D5E;
@@ -175,7 +175,7 @@
   .kindpill{font-size:11px; font-weight:700; padding:1px 8px; border-radius:20px; border:1px solid; flex:none}
   .a0row{display:flex; align-items:center; gap:9px; margin:14px 0 4px; padding:11px 13px; border:1px solid var(--line); border-radius:10px; background:var(--soft); font-size:13.5px; font-weight:600; cursor:pointer}
   .a0row input{width:17px; height:17px; accent-color:var(--brand); cursor:pointer}
-  .a0row .a0hint{margin-left:auto; font-size:12px; font-weight:700; color:var(--muted)}
+  .revc{background:#1E6B52} .lpill{font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;flex:none;color:#fff;background:#334155} .lpill.A2{background:#7C3AED} .regionrow .seg button.on.lv{background:#334155;color:#fff} .regionrow .seg button.on.lv.A2{background:#7C3AED} .a0row .a0hint{margin-left:auto; font-size:12px; font-weight:700; color:var(--muted)}
 
   .legend{display:flex; flex-wrap:wrap; gap:14px; padding:13px 16px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted)}
   .legend .li{display:flex; align-items:center; gap:6px}
@@ -203,9 +203,9 @@
 <div class="wrap">
   <header class="top">
     <img src="data:image/jpeg;base64,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" alt="MLI">
-    <div class="ti"><h1>排课计算器</h1></div>
+    <div class="ti"><h1>A1 · A2 排课计算器</h1></div>
   </header>
-  <p class="sub">按班级把 A0 语音 + A1 阶段（含 A0 共 29 堂，不含 A0 则 26 堂）铺进真实日历，自动跳过法定假日与请假日；教务可管理多个班级，最后在「汇总总览」一次导出所有班的考试与结课日期。</p>
+  <p class="sub">按班级把 A1（含 A0 共 29 堂，不含 A0 则 26 堂）或 A2（全日制 37 堂 · 兼读制 34 堂）铺进真实日历，自动跳过法定假日与请假日；教务可管理多个班级，最后在「汇总总览」一次导出所有班的考试与结课日期。</p>
 
   <div class="maintabs">
     <button data-tab="setup" class="on">班级设置</button>
@@ -310,8 +310,35 @@ function buildSequence(mode, withA0=true){
   s.forEach((c,i)=>c.seq=i+1);
   return s;
 }
+/* ===== A2 ===== */
+const A2_MID_DECK=7, A2_ZJ=20, A2_WJ={full:13, part:10}, A2_REV=3;
+/* 外教课件：全日制 L1–L13 依序；兼读制 10 堂，不用 L1、L2（开场复习）与 L12（和中教复习重复） */
+const WJ_DECK={full:[1,2,3,4,5,6,7,8,9,10,11,12,13], part:[3,4,5,6,7,8,9,10,11,13]};
+const DECK_T={1:'Se présenter',2:'Objets et lieux',3:'Ma semaine',4:'Sorties en famille',5:'Avant et demain',6:'Récits et métiers',7:'Plus vert, plus poli',8:'Météo et sorties',9:'Embauche et magasinage',10:'Au bureau',11:'Maison et santé',12:'Révision et TCF',13:'Bilan A2'};
+const DECK_R={1:'开场复习',2:'开场复习',3:'回收中1–2',4:'回收中3–4',5:'回收中5–6',6:'回收中7–8',7:'回收中9–10',8:'回收中11–12',9:'回收中13–14',10:'回收中15',11:'回收中16–18',12:'复习中19–20 + TCF',13:'Bilan 总测'};
+const DECK_NEED={3:2,4:4,5:6,6:8,7:10,8:12,9:14,10:15,11:18,12:20,13:20};
+function buildSequenceA2(mode){
+  const s=[]; let zj=0,wj=0; const W=A2_WJ[mode]||A2_WJ.part;
+  const nz=mode==='full'?3:2, nw=mode==='full'?2:1;
+  while(zj<A2_ZJ||wj<W){
+    for(let k=0;k<nz&&zj<A2_ZJ;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null});}
+    for(let k=0;k<nw&&wj<W;k++){wj++; const dk=WJ_DECK[mode][wj-1]; s.push({type:'WJ',idx:wj,deck:dk,exam:dk===13?'bilan':null});}
+  }
+  s.forEach((c,i)=>c.seq=i+1);
+  return s;
+}
+function content(c){
+  if(c.rev) return '中教复习 '+c.rev;
+  if(c.exam==='final') return '期末考';
+  if(c.type==='WJ'&&c.deck) return 'A2_L'+c.deck+' '+DECK_T[c.deck]+'（'+DECK_R[c.deck]+'）';
+  if(c.lv==='A2'&&c.type==='ZJ') return 'Leçon '+c.idx;
+  return '';
+}
+const isA2=c=>c.level==='A2';
+function stagesOf(c,r){ return r.combo?[{lv:'A1',seq:r.seq.filter(x=>x.stage===1)},{lv:'A2',seq:r.seq.filter(x=>x.stage===2)}]:[{lv:c.level==='A2'?'A2':'A1',seq:r.seq}]; }
 const teacherOf=c=>c.type==='WJ'?'外教':(c.type==='ZJ'?'中教':'A0 语音');
-function midSuggest(seq,mode){
+function midSuggest(seq,mode,level){
+  if(level==='A2'){ const c=seq.find(x=>x.type==='WJ'&&x.deck===A2_MID_DECK); return c?c.date:null; }
   const a=MID_ANCHOR[mode]||MID_ANCHOR.part;
   const c=seq.find(x=>x.type===a.type&&x.idx===a.idx);
   return c?c.date:null;
@@ -330,7 +357,7 @@ const WD_CN=['周日','周一','周二','周三','周四','周五','周六'];
 let CID=0;
 function newClass(){
   CID++;
-  return {id:CID, name:'班级 '+CID, region:'east', mode:'full', start:'', a0:true,
+  return {id:CID, name:'班级 '+CID, region:'east', level:'A1', mode:'full', start:'', a0:true,
     days:{A0:[1,2,3,4,5],ZJ:[1,2,3,4,5],WJ:[1,2,3,4,5]},
     perDay:{A0:1,ZJ:1,WJ:1}, leaves:[]};
 }
@@ -341,7 +368,7 @@ const HOL_VERSION=3;                            // 每次新增预载假日就 +
 const HOL_NEW={2:['2026-12-26','2026-12-28'],3:['2026-09-30','2026-11-11','2027-09-30','2027-11-11']};  // 各版本新增、对老用户自动开启
 function snapshot(){ return {v:1,holVer:HOL_VERSION,CID,activeId:state.activeId,year:state.year,holEnabled:[...state.holEnabled],custom:state.custom,classes:state.classes}; }
 function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(snapshot())); }catch(e){} }
-function migrateLeaves(c){ if(c.a0===undefined)c.a0=true; if(c.region!=='west')c.region='east'; c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
+function migrateLeaves(c){ if(c.a0===undefined)c.a0=true; if(c.region!=='west')c.region='east'; if(c.level!=='A2'&&c.level!=='A12')c.level='A1'; c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
 function restore(d){ if(!d||!d.classes||!d.classes.length) return false;
   state.classes=d.classes.map(migrateLeaves); state.activeId=d.activeId||d.classes[0].id;
   state.holEnabled=new Set(d.holEnabled||[]); state.custom=d.custom||[]; state.year=d.year||2026;
@@ -379,9 +406,11 @@ function isBlocked(ds,type,cls){
 }
 function computeSchedule(cls){
   if(!cls.start) return {error:'未设开班日期'};
-  const need = cls.a0!==false ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
+  const A2=isA2(cls);
+  const need = (!A2&&cls.a0!==false) ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
   for(const t of need) if(cls.days[t].length===0) return {error:`${TYPES[t].name} 无上课日`};
-  const seq=buildSequence(cls.mode, cls.a0!==false);
+  const seq=A2?buildSequenceA2(cls.mode):buildSequence(cls.mode, cls.a0!==false);
+  seq.forEach(c=>c.lv=A2?'A2':'A1');
   const placed={}; // 每类各自计数，中教/外教可同日不冲突
   function place(list, from){
     let cursor=new Date(from);
@@ -409,7 +438,27 @@ function computeSchedule(cls){
   /* 考试：内容课全部上完后，接着最近的两个上课日安排 Bilan 与期末，轮到谁就是谁；
      同一天两位老师都能排时以中教为主。中教 15 堂新知识永远不被占用。 */
   let special=null;
-  if(cls.mode==='full'){
+  if(A2){
+    /* A2：内容课后最近的上课日排期末（轮到谁就是谁，同天以中教为主），期末后中教复习 3 堂 */
+    const last=new Date(Math.max(...seq.map(c=>+c.date)));
+    const nextIdx=t=>Math.max(0,...seq.filter(c=>c.type===t).map(c=>c.idx))+1;
+    let d=new Date(last); d.setDate(d.getDate()+1);
+    for(let g=0;g<6000;g++){
+      const ds=fmt(d);
+      const ok=['ZJ','WJ'].filter(t=>cls.days[t].includes(d.getDay())&&((placed[ds]&&placed[ds][t])||0)<cls.perDay[t]&&!isBlocked(ds,t,cls));
+      if(ok.length){
+        const t=ok.includes('ZJ')?'ZJ':'WJ';
+        placed[ds]=placed[ds]||{A0:0,ZJ:0,WJ:0}; placed[ds][t]++;
+        seq.push({type:t,idx:nextIdx(t),exam:'final',lv:'A2',date:new Date(d),examSlot:true,seq:seq.length+1});
+        break;
+      }
+      d.setDate(d.getDate()+1);
+    }
+    const fin=seq[seq.length-1]; const from=new Date(fin.date); from.setDate(from.getDate()+1);
+    const z0=nextIdx('ZJ'); const revs=[];
+    for(let i=1;i<=A2_REV;i++) revs.push({type:'ZJ',idx:z0+i-1,exam:null,rev:i,lv:'A2',seq:seq.length+i});
+    place(revs, from); revs.forEach(r=>seq.push(r));
+  } else if(cls.mode==='full'){
     let last=new Date(Math.max(...seq.map(c=>+c.date)));
     const nextIdx=t=>Math.max(0,...seq.filter(c=>c.type===t).map(c=>c.idx))+1;
     ['bilan','final'].forEach(k=>{
@@ -434,15 +483,27 @@ function computeSchedule(cls){
   byDate.forEach((c,i)=>c.no=i+1);
   const finDate=seq.find(c=>c.exam==='final').date;
   const lateWJ=seq.filter(c=>c.type==='WJ'&&c.date>finDate).sort((a,b)=>a.date-b.date);
-  return {seq, lateWJ, special};
+  let early=[];
+  if(A2) early=seq.filter(x=>x.type==='WJ'&&DECK_NEED[x.deck]).map(x=>{const z=seq.find(y=>y.type==='ZJ'&&!y.exam&&!y.rev&&y.idx===DECK_NEED[x.deck]); return z&&+x.date<=+z.date?{x,z}:null;}).filter(Boolean);
+  if(cls.level==='A12'){
+    seq.forEach(c=>{c.stage=1; c.sno=c.no;});
+    const close=new Date(Math.max(...seq.map(c=>+c.date)));
+    let st; if(cls.a2start&&cls.a2start>fmt(close)) st=cls.a2start; else {const d=new Date(close); d.setDate(d.getDate()+1); st=fmt(d);}
+    const r2=computeSchedule({...cls, level:'A2', start:st});
+    if(r2.error) return r2;
+    const off=seq.length; r2.seq.forEach(c=>{c.stage=2; c.sno=c.no; c.seq+=off;});
+    const all=[...seq,...r2.seq]; [...all].sort((a,b)=>(a.date-b.date)||(a.seq-b.seq)).forEach((c,i)=>c.no=i+1);
+    return {seq:all, lateWJ, special, early:r2.early, lateWJ2:r2.lateWJ, combo:true};
+  }
+  return {seq, lateWJ, special, early};
 }
-function milestones(seq,mode){
+function milestones(seq,mode,level){
   const g=k=>seq.find(c=>c.exam===k);
   const dates=seq.map(c=>+c.date);
   const open=new Date(Math.min(...dates)), close=new Date(Math.max(...dates));
   const a0s=seq.filter(c=>c.type==='A0');
   const fi=g('final'), bi=g('bilan');
-  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:midSuggest(seq,mode),
+  return {open, a0:a0s.length?a0s[a0s.length-1].date:null, mid:midSuggest(seq,mode,level),
     final:fi?.date, finalBy:fi?teacherOf(fi):null, bilan:bi?.date, bilanBy:bi?teacherOf(bi):null,
     close, weeks:Math.ceil((close-open)/(7*864e5))+1};
 }
@@ -454,7 +515,7 @@ function renderClassList(){
     const el=document.createElement('div');
     el.className='clsitem'+(c.id===state.activeId?' on':'');
     const mt=c.mode==='full'?'全日制':'兼读制';
-    el.innerHTML=`<span class="rpill ${c.region||'east'}">${REGION[c.region||'east'].name}</span><span class="nm">${c.name}</span><span class="st">${c.start?md(parse(c.start)):'未设'}</span><span class="mt">${mt}</span><span class="del">×</span>`;
+    el.innerHTML=`<span class="rpill ${c.region||'east'}">${REGION[c.region||'east'].name}</span><span class="lpill ${c.level==='A1'?'A1':'A2'}">${c.level==='A12'?'A1→A2':c.level}</span><span class="nm">${c.name}</span><span class="st">${c.start?md(parse(c.start)):'未设'}</span><span class="mt">${mt}</span><span class="del">×</span>`;
     el.onclick=e=>{ if(e.target.classList.contains('del')) return; state.activeId=c.id; renderAll(); };
     el.querySelector('.del').onclick=()=>{
       if(state.classes.length===1){ toast('至少保留一个班级'); return; }
@@ -473,7 +534,14 @@ function renderEditor(){
     <div class="editor-head">
       <input type="text" id="clsName" value="${c.name.replace(/"/g,'&quot;')}">
     </div>
-    <div class="regionrow"><label class="field">地区（先选）</label>
+    <div class="regionrow"><label class="field">级别</label>
+      <div class="seg" id="clsLevel" style="margin-bottom:12px">
+        <button data-l="A1" class="lv A1${!isA2(c)?' on':''}">A1</button>
+        <button data-l="A2" class="lv A2${isA2(c)?' on':''}">A2</button>
+        <button data-l="A12" class="lv A2${c.level==='A12'?' on':''}">A1 → A2</button>
+      </div>
+      ${c.level==='A12'?`<div style="margin:-4px 0 12px"><label class="field">A2 开班日（留空＝A1 结课后接着上）</label><input type="date" id="a2Start" value="${c.a2start||''}"></div>`:''}
+<label class="field">地区</label>
       <div class="seg" id="clsRegion">
         <button data-r="east" class="east${c.region!=='west'?' on':''}">加东</button>
         <button data-r="west" class="west${c.region==='west'?' on':''}">加西</button>
@@ -489,12 +557,13 @@ function renderEditor(){
         </div>
       </div>
     </div>
-    <p class="note">${c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补两堂中教。期末＝中教第 18 堂，不加课。'}期中改为在家完成，不占课堂，只给建议完成日。</p>
+    ${c.level==='A12'?`<p class="note">先排 A1，A1 结课后接着排 A2（同一个班型、上课日、地区和请假设置）。A2 部分：${c.mode==='full'?'全日制 37 堂（中教 20 + 外教 13 + 期末 + 中教复习 3）':'兼读制 34 堂（中教 20 + 外教 10 + 期末 + 中教复习 3）'}。</p>`:''}
+    <p class="note">${isA2(c)?(c.mode==='full'?'A2 全日制「中中中外外」轮流：中教 20 堂新知识 + 外教 13 堂（L1–L13，外教第 13 堂＝Bilan），共 33 堂；第 34 堂期末，接在内容课后最近的上课日，轮到谁就是谁，同天两边都能排时以中教为主；期末后中教复习 3 堂。合计 37 堂。':'A2 兼读制「中中外」轮流：中教 20 堂新知识 + 外教 10 堂（课件 L3–L11 与 L13，外教第 10 堂＝Bilan），共 30 堂；第 31 堂期末；期末后中教复习 3 堂。合计 34 堂。建议周二开班。')+'期中在家完成，建议完成日＝外教上 L7（回收中9–10）那天。':(c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补两堂中教。期末＝中教第 18 堂，不加课。')+'期中改为在家完成，不占课堂，只给建议完成日。'}</p>
 
-    <label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（3 堂）</span><span class="a0hint">${c.a0!==false?'共 29 堂':'仅算 A1，共 26 堂'}</span></label>
+    ${isA2(c)?'':`<label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（3 堂）</span><span class="a0hint">${c.a0!==false?'共 29 堂':'仅算 A1，共 26 堂'}</span></label>`}
 
     <div class="block"><h2>每周上课日</h2><div id="teachers"></div>
-      <p class="note">${c.a0!==false?'A0 语音先上完，之后中教、外教各走各的上课日、各自排课':'从 A1 开始，中教、外教各走各的上课日、各自排课'}——一方请假只顺延自己的课，不影响另一方。全日制一天多堂就调「每天最多堂数」。</p></div>
+      <p class="note">${(!isA2(c)&&c.a0!==false)?'A0 语音先上完，之后中教、外教各走各的上课日、各自排课':'从 A1 开始，中教、外教各走各的上课日、各自排课'}——一方请假只顺延自己的课，不影响另一方。全日制一天多堂就调「每天最多堂数」。</p></div>
 
     <div class="block"><h2>本班请假 / 休假 / 停课</h2>
       <div class="leave-add">
@@ -513,7 +582,9 @@ function renderEditor(){
   box.querySelectorAll('#clsRegion button').forEach(b=>b.onclick=()=>{c.region=b.dataset.r; renderClassList(); renderEditor(); renderDetail();});
   document.getElementById('clsStart').onchange=e=>{c.start=e.target.value; renderClassList(); renderDetail();};
   box.querySelectorAll('#clsMode button').forEach(b=>b.onclick=()=>{c.mode=b.dataset.mode; renderClassList(); renderEditor(); renderDetail();});
-  document.getElementById('clsA0').onchange=e=>{c.a0=e.target.checked; renderEditor(); renderDetail();};
+  if(document.getElementById('a2Start')) document.getElementById('a2Start').onchange=e=>{c.a2start=e.target.value; renderDetail();};
+  box.querySelectorAll('#clsLevel button').forEach(b=>b.onclick=()=>{c.level=b.dataset.l; renderClassList(); renderEditor(); renderDetail();});
+  if(document.getElementById('clsA0')) document.getElementById('clsA0').onchange=e=>{c.a0=e.target.checked; renderEditor(); renderDetail();};
   renderTeachers(c);
   renderLeaves(c);
   document.getElementById('leaveAdd').onclick=()=>{
@@ -526,7 +597,7 @@ function renderEditor(){
 }
 function renderTeachers(c){
   const box=document.getElementById('teachers'); box.innerHTML='';
-  const types = c.a0!==false ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
+  const types = (!isA2(c)&&c.a0!==false) ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
   for(const t of types){
     const row=document.createElement('div'); row.className='teacher-row';
     row.innerHTML=`<div class="thead"><span class="dot" style="background:${TYPES[t].color}"></span><span class="tname">${t==='A0'?'A0 语音':TYPES[t].name}</span></div>`;
@@ -570,7 +641,7 @@ function holidayName(ds){
 }
 /* 落在开班~结课之间、且压到该班上课日的法定假日——用来解释「为什么外教走得慢」 */
 function holidaysInRange(cls,lo,hi){
-  const kinds = cls.a0!==false?['A0','ZJ','WJ']:['ZJ','WJ'];
+  const kinds = (!isA2(cls)&&cls.a0!==false)?['A0','ZJ','WJ']:['ZJ','WJ'];
   return [...state.holEnabled].sort().map(ds=>{
     if(!holApplies(ds,cls)) return null;
     const d=parse(ds), t=+d; if(t<lo||t>hi) return null;
@@ -593,28 +664,35 @@ function renderHolidays(){
 }
 
 /* ---------- 渲染：单班明细 ---------- */
-function chipColor(c){return c.exam?EXAM[c.exam].color:TYPES[c.type].color;}
-function chipLabel(c){return c.exam==='bilan'?'Bil':c.exam==='mid'?'期中':c.exam==='final'?'期末':TYPES[c.type].short+c.idx;}
+function chipColor(c){return c.rev?'#1E6B52':c.exam?EXAM[c.exam].color:TYPES[c.type].color;}
+function chipLabel(c){return c.rev?'复'+c.rev:c.exam==='bilan'?'Bil':c.exam==='mid'?'期中':c.exam==='final'?'期末':TYPES[c.type].short+c.idx;}
 function renderDetail(){
   const c=active(); const root=document.getElementById('detail'); save();
   const r=computeSchedule(c);
   if(r.error){ root.innerHTML=`<div class="card"><div class="empty">${r.error}，请在上方补齐后查看日程。</div></div>`; return; }
-  const seq=r.seq, m=milestones(seq,c.mode);
+  const seq=r.seq, ST=stagesOf(c,r);
+  const all=milestones(seq,c.mode,ST[0].lv), MS=ST.map(t=>milestones(t.seq,c.mode,t.lv)), m=MS[0];
   const stat=(k,v)=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`;
-  let html=`<div class="summary">${stat('开班',md(m.open))}${stat('结课',md(m.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',m.weeks+' 周')}</div>`;
-  html+='<div class="exam-cards">';
-  if(m.mid) html+=`<div class="ecard home"><div class="lbl">期中 · 在家完成</div><div class="d">${md(m.mid)}</div><div class="w">${WD_CN[m.mid.getDay()]} · 建议完成日，不占课堂</div></div>`;
-  (c.mode==='full'?['bilan','final']:['final']).forEach(k=>{const cc=seq.find(x=>x.exam===k); if(!cc)return;
-    html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${EXAM[k].name}<span class="by">${teacherOf(cc)}考</span></div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.no} 次课 · ${teacherOf(cc)}第 ${cc.idx} 堂</div></div>`;});
-  html+='</div>';
-  {const zc=seq.filter(x=>x.type==='ZJ'), wc=seq.filter(x=>x.type==='WJ');
-   const zn=zc.filter(x=>!x.exam).length, wn=wc.filter(x=>!x.exam).length;
-   html+=`<div class="tally">内容课时：中教新知识 <b>${zn}</b> 堂 · 外教口语 <b>${wn}</b> 堂 · 考试占用 <b>${zc.length+wc.length-zn-wn}</b> 堂 · 合计 <b>${seq.length}</b> 堂</div>`;}
-  if(r.lateWJ&&r.lateWJ.length){
-    const ds=r.lateWJ.map(x=>`外教第 ${x.idx} 堂 ${md(x.date)}`).join('、');
-    html+=`<div class="warnbar">⚠ 期末（${md(m.final)}）之后外教还剩 ${r.lateWJ.length} 堂：${ds}。请决定改期、并堂，或当作考后口语课。</div>`;
-  }
-  html+=`<div class="card"><div class="chead"><h3>${esc(c.name)} · ${REGION[c.region||'east'].name} · 课程日程</h3>
+  let html=r.combo
+    ? `<div class="summary">${stat('A1 开班',md(MS[0].open))}${stat('A1 结课',md(MS[0].close))}${stat('A2 开班',md(MS[1].open))}${stat('A2 结课',md(MS[1].close))}</div><div class="tally">A1 + A2 合计 <b>${seq.length}</b> 堂 · 跨越 <b>${all.weeks}</b> 周</div>`
+    : `<div class="summary">${stat('开班',md(all.open))}${stat('结课',md(all.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',all.weeks+' 周')}</div>`;
+  ST.forEach((t,i)=>{ const mm=MS[i], S=t.seq, A2s=t.lv==='A2', pre=r.combo?t.lv+' ':'';
+    html+='<div class="exam-cards">';
+    if(mm.mid) html+=`<div class="ecard home"><div class="lbl">${pre}期中 · 在家完成</div><div class="d">${md(mm.mid)}</div><div class="w">${WD_CN[mm.mid.getDay()]} · 建议完成日，不占课堂</div></div>`;
+    ((A2s||c.mode==='full')?['bilan','final']:['final']).forEach(k=>{const cc=S.find(x=>x.exam===k); if(!cc)return;
+      html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${pre}${EXAM[k].name}<span class="by">${teacherOf(cc)}考</span></div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.sno||cc.no} 次课 · ${teacherOf(cc)}第 ${cc.idx} 堂</div></div>`;});
+    html+='</div>';
+    const zc=S.filter(x=>x.type==='ZJ'), wc=S.filter(x=>x.type==='WJ');
+    if(A2s){ const zn2=zc.filter(x=>!x.exam&&!x.rev).length, wn2=wc.filter(x=>x.exam!=='final').length, rn2=zc.filter(x=>x.rev).length;
+      html+=`<div class="tally">A2 · 中教新知识 <b>${zn2}</b> 堂 · 外教 <b>${wn2}</b> 堂（含 Bilan）· 期末 <b>1</b> 堂 · 中教复习 <b>${rn2}</b> 堂 · 合计 <b>${S.length}</b> 堂</div>`; }
+    else { const zn=zc.filter(x=>!x.exam).length, wn=wc.filter(x=>!x.exam).length;
+      html+=`<div class="tally">${pre}内容课时：中教新知识 <b>${zn}</b> 堂 · 外教口语 <b>${wn}</b> 堂 · 考试占用 <b>${zc.length+wc.length-zn-wn}</b> 堂 · 合计 <b>${S.length}</b> 堂</div>`; }
+  });
+  if(r.early&&r.early.length) html+=`<div class="warnbar">⚠ A2 外教跑在中教前面：${r.early.map(({x,z})=>`外教第 ${x.idx} 堂 ${md(x.date)} 用 L${x.deck}（要先上完中${DECK_NEED[x.deck]}），但中${z.idx} 在 ${md(z.date)}${+x.date===+z.date?'（同一天）':''}`).join('；')}。可调上课日，或把这几堂外教课往后挪。</div>`;
+  [[r.lateWJ,MS[0]],[r.lateWJ2,MS[1]]].forEach(([L,mm])=>{ if(L&&L.length&&mm){
+    const ds=L.map(x=>`外教第 ${x.idx} 堂 ${md(x.date)}`).join('、');
+    html+=`<div class="warnbar">⚠ 期末（${md(mm.final)}）之后外教还剩 ${L.length} 堂：${ds}。请决定改期、并堂，或当作考后口语课。</div>`; }});
+  html+=`<div class="card"><div class="chead"><h3>${esc(c.name)} · ${c.level==='A12'?'A1 → A2':(c.level||'A1')} · ${REGION[c.region||'east'].name} · 课程日程</h3>
     <div class="viewtabs" id="viewTabs">
       <button data-v="chips"${state.view==='chips'?' class="on"':''}>节奏条</button>
       <button data-v="table"${state.view==='table'?' class="on"':''}>明细表</button>
@@ -626,6 +704,7 @@ function renderDetail(){
       <div class="li"><span class="sw" style="background:${TYPES.WJ.color}"></span>外教 口语</div>
       <div class="li"><span class="sw" style="background:${EXAM.final.color}"></span>期末</div>
       <div class="li"><span class="sw" style="background:${EXAM.bilan.color}"></span>Bilan</div>
+      <div class="li"><span class="sw" style="background:#1E6B52"></span>A2 中教复习</div>
       <div class="li"><span class="sw" style="background:#fff3e6;border:1px dashed #e3b478"></span>法定假日</div>
       <div class="li"><span class="sw" style="background:#d24b4b"></span>请假 / 停课</div>
       <div class="li"><span class="sw" style="background:#475569"></span>休假</div>
@@ -646,26 +725,27 @@ function renderViewBody(seq){
   const merge=()=>[...byDate.map(c=>({k:'c',c})), ...overlaps.map(lv=>({k:'lv',lv,date:parse(lv.start)})), ...hols.map(h=>({k:'h',h,date:h.date}))]
     .sort((a,b)=>{const da=a.k==='c'?a.c.date:a.date, db=b.k==='c'?b.c.date:b.date; return (da-db)||(a.k==='c'?-1:1);});
   if(state.view==='chips'){
-    let h='<div class="chips">'; let sep=false;
+    let h='<div class="chips">'; let sep=false, sep2=false;
     merge().forEach(it=>{
       if(it.k==='h'){
         h+=`<span class="chip hchip" title="${esc(it.h.name)}"><span class="cn">${esc(it.h.name.split(' ')[0])}</span><span class="cd">${md(it.h.date)} ${SCOPE[it.h.scope]}</span></span>`; return; }
       if(it.k==='lv'){ const k=KIND[it.lv.kind]||KIND.leave;
         h+=`<span class="chip lchip" style="background:${k.bg};color:${k.color};border-color:${k.border}"><span class="cn">${rlabel(it.lv)}</span><span class="cd">${rrange(it.lv)}</span></span>`; return; }
-      const c=it.c; if(active().a0!==false&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
-      h+=`<span class="chip" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}${c.exam?' '+teacherOf(c):''}</span></span>`;});
+      const c=it.c; if(!isA2(active())&&active().a0!==false&&!sep&&c.type!=='A0'){h+='<span class="chip sep">▮</span>'; sep=true;}
+      if(c.stage===2&&!sep2){h+='<span class="chip sep" style="width:auto;padding:0 8px">A2 ▸</span>'; sep2=true;}
+      h+=`<span class="chip" title="${esc(content(c))}" style="background:${chipColor(c)}"><span class="cn">${chipLabel(c)}</span><span class="cd">${md(c.date)}${c.exam?' '+teacherOf(c):''}</span></span>`;});
     body.innerHTML=h+'</div>';
   } else if(state.view==='table'){
-    let h='<div class="tblwrap"><table><thead><tr><th>#</th><th>日期</th><th>星期</th><th>科目</th><th>本科第几堂</th><th>备注</th></tr></thead><tbody>'; let n=0;
+    let h='<div class="tblwrap"><table><thead><tr><th>#</th><th>日期</th><th>星期</th><th>科目</th><th>本科第几堂</th><th>内容 / 课件</th><th>备注</th></tr></thead><tbody>'; let n=0;
     merge().forEach(it=>{
       if(it.k==='h'){ const hd=it.h;
-        h+=`<tr class="lrow holiday"><td></td><td class="n">${fmt(hd.date)}</td><td>${WD_CN[hd.date.getDay()]}</td><td class="lcell" colspan="3">📅 法定假日 · ${esc(hd.name)} · ${SCOPE[hd.scope]}停课顺延</td></tr>`; return; }
+        h+=`<tr class="lrow holiday"><td></td><td class="n">${fmt(hd.date)}</td><td>${WD_CN[hd.date.getDay()]}</td><td class="lcell" colspan="4">📅 法定假日 · ${esc(hd.name)} · ${SCOPE[hd.scope]}停课顺延</td></tr>`; return; }
       if(it.k==='lv'){ const lv=it.lv, k=KIND[lv.kind]||KIND.leave; const single=lv.start===lv.end;
-        h+=`<tr class="lrow ${lv.kind}"><td></td><td class="n">${rrange(lv,true)}</td><td>${single?WD_CN[parse(lv.start).getDay()]:'—'}</td><td class="lcell" colspan="3">${k.icon} ${rlabel(lv)} · 期间顺延</td></tr>`; return; }
+        h+=`<tr class="lrow ${lv.kind}"><td></td><td class="n">${rrange(lv,true)}</td><td>${single?WD_CN[parse(lv.start).getDay()]:'—'}</td><td class="lcell" colspan="4">${k.icon} ${rlabel(lv)} · 期间顺延</td></tr>`; return; }
       const c=it.c; n++; const cl=c.exam==='bilan'?'bilan':(c.exam?'exam':'');
       const tn=c.type==='A0'?'A0 语音':(c.type==='ZJ'?'中教':'外教');
-      const note=c.exam?`<span class="badge" style="background:${EXAM[c.exam].color}">${EXAM[c.exam].name} · ${tn}考</span>${c.examSlot?'<span class="badge xtra">考试堂</span>':''}`:'';
-      h+=`<tr class="${cl}"><td class="n">${n}</td><td class="n">${fmt(c.date)}</td><td>${WD_CN[c.date.getDay()]}</td><td><span class="tag"><span class="sw" style="background:${TYPES[c.type].color}"></span>${tn}</span></td><td class="n">第 ${c.idx} 堂</td><td>${note}</td></tr>`;});
+      const note=c.rev?`<span class="badge revc">中教复习</span>`:(c.lv==='A2'&&c.exam==='bilan')?`<span class="badge" style="background:${EXAM.bilan.color}">Bilan · 外教上</span>`:c.exam?`<span class="badge" style="background:${EXAM[c.exam].color}">${EXAM[c.exam].name} · ${tn}考</span>${c.examSlot?'<span class="badge xtra">考试堂</span>':''}`:'';
+      h+=`<tr class="${cl}"><td class="n">${n}</td><td class="n">${fmt(c.date)}</td><td>${WD_CN[c.date.getDay()]}</td><td><span class="tag"><span class="sw" style="background:${TYPES[c.type].color}"></span>${tn}</span></td><td class="n">${c.stage?`<b>${c.stage===2?'A2':'A1'}</b> `:''}第 ${c.idx} 堂</td><td>${esc(content(c))}</td><td>${note}</td></tr>`;});
     body.innerHTML=h+'</tbody></table></div>';
   } else body.innerHTML=renderCalendar(seq);
 }
@@ -698,15 +778,15 @@ function renderCalendar(seq){
 /* ---------- 渲染：汇总总览 ---------- */
 function renderOverview(){
   const t=document.getElementById('ovTable');
-  let h='<thead><tr><th>班级</th><th>地区</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中(在家)</th><th>期末</th><th>Bilan</th><th>结课</th><th>周数</th></tr></thead><tbody>';
+  let h='<thead><tr><th>班级</th><th>级别</th><th>地区</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中(在家)</th><th>Bilan</th><th>期末</th><th>结课</th><th>周数</th></tr></thead><tbody>';
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     const rn=REGION[c.region||'east'].name;
-    if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${rn}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
-    const m=milestones(r.seq,c.mode);
+    if(r.error){ h+=`<tr><td>${esc(c.name)}</td><td>${c.level==='A12'?'A1→A2':c.level||'A1'}</td><td>${rn}</td><td>${mt}</td><td class="err" colspan="7">${r.error}</td></tr>`; return; }
     const wd=d=>d?`${md(d)} ${WD_CN[d.getDay()]}`:'—';
     const wdby=(d,by)=>d?`${wd(d)} <span class="by-i">${by}考</span>`:'—';
-    h+=`<tr><td><b>${esc(c.name)}</b></td><td><span class="rpill ${c.region||'east'}">${rn}</span></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}${m.mid?' <span class="by-i">在家</span>':''}</td><td class="n fin">${wdby(m.final,m.finalBy)}</td><td class="n bil">${wdby(m.bilan,m.bilanBy)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`;
+    stagesOf(c,r).forEach((st,i)=>{ const m=milestones(st.seq,c.mode,st.lv);
+      h+=`<tr><td>${i?'<span style="color:var(--muted)">↳</span>':'<b>'+esc(c.name)+'</b>'}</td><td><span class="lpill ${st.lv}">${st.lv}</span></td><td><span class="rpill ${c.region||'east'}">${rn}</span></td><td>${mt}</td><td class="n">${wd(m.open)}</td><td class="n">${wd(m.a0)}</td><td class="n mid">${wd(m.mid)}${m.mid?' <span class="by-i">在家</span>':''}</td><td class="n bil">${wdby(m.bilan,m.bilanBy)}</td><td class="n fin">${wdby(m.final,m.finalBy)}</td><td class="n">${wd(m.close)}</td><td class="n">${m.weeks}</td></tr>`; });
   });
   t.innerHTML=h+'</tbody>';
 }
@@ -714,24 +794,24 @@ const esc=s=>String(s).replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 
 /* ---------- 复制 / 导出 ---------- */
 function ovTSV(){
-  const head=['班级','地区','班型','开班','A0完成','期中(在家·建议)','期末','Bilan','结课','周数'];
+  const head=['班级','级别','地区','班型','开班','A0完成','期中(在家·建议)','Bilan','期末','结课','周数'];
   const rows=[head.join('\t')];
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     const rn=REGION[c.region||'east'].name;
-    if(r.error){ rows.push([c.name,rn,mt,r.error,'','','','','',''].join('\t')); return; }
-    const m=milestones(r.seq,c.mode); const f=d=>d?fmt(d):'';
-    const fb=(d,by)=>d?fmt(d)+'（'+by+'考）':'';
-    rows.push([c.name,rn,mt,f(m.open),f(m.a0),f(m.mid),fb(m.final,m.finalBy),fb(m.bilan,m.bilanBy),f(m.close),m.weeks].join('\t'));
+    if(r.error){ rows.push([c.name,c.level,rn,mt,r.error,'','','','','',''].join('\t')); return; }
+    const f=d=>d?fmt(d):''; const fb=(d,by)=>d?fmt(d)+'（'+by+'考）':'';
+    stagesOf(c,r).forEach(st=>{ const m=milestones(st.seq,c.mode,st.lv);
+      rows.push([c.name,st.lv,rn,mt,f(m.open),f(m.a0),f(m.mid),fb(m.bilan,m.bilanBy),fb(m.final,m.finalBy),f(m.close),m.weeks].join('\t')); });
   });
   return rows.join('\n');
 }
 function detailTSV(){
-  const rows=[['班级','地区','班型','序号','日期','星期','科目','本科第几堂','备注'].join('\t')];
+  const rows=[['班级','级别','地区','班型','序号','日期','星期','科目','本科第几堂','内容','备注'].join('\t')];
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     const rn=REGION[c.region||'east'].name;
-    if(r.error){ rows.push([c.name,rn,mt,'',r.error,'','','',''].join('\t')); return; }
+    if(r.error){ rows.push([c.name,c.level||'A1',rn,mt,'',r.error,'','','','',''].join('\t')); return; }
     const bd=[...r.seq].sort((a,b)=>a.date-b.date);
     const lo=Math.min(...bd.map(x=>+x.date)), hi=Math.max(...bd.map(x=>+x.date));
     const overlaps=c.leaves.filter(lv=>+parse(lv.end)>=lo && +parse(lv.start)<=hi);
@@ -741,12 +821,12 @@ function detailTSV(){
     let n=0;
     items.forEach(it=>{
       if(it.hol){ const hd=it.h;
-        rows.push([c.name,rn,mt,'',fmt(hd.date),WD_CN[hd.date.getDay()],'—','','法定假日 · '+hd.name+' · '+SCOPE[hd.scope]+'停课顺延'].join('\t')); return; }
+        rows.push([c.name,c.level||'A1',rn,mt,'',fmt(hd.date),WD_CN[hd.date.getDay()],'—','','','法定假日 · '+hd.name+' · '+SCOPE[hd.scope]+'停课顺延'].join('\t')); return; }
       if(it.leave){ const lv=it.lv, k=KIND[lv.kind]||KIND.leave; const single=lv.start===lv.end;
         const dcol=single?fmt(parse(lv.start)):`${fmt(parse(lv.start))}→${fmt(parse(lv.end))}`;
-        rows.push([c.name,rn,mt,'',dcol,single?WD_CN[parse(lv.start).getDay()]:'—','—','',SCOPE[lv.scope]+k.name+' · 顺延'].join('\t')); return; }
+        rows.push([c.name,c.level||'A1',rn,mt,'',dcol,single?WD_CN[parse(lv.start).getDay()]:'—','—','','',SCOPE[lv.scope]+k.name+' · 顺延'].join('\t')); return; }
       const x=it.x; n++; const tn=x.type==='A0'?'A0语音':(x.type==='ZJ'?'中教':'外教');
-      rows.push([c.name,rn,mt,n,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',x.exam?EXAM[x.exam].name+' · '+tn+'考':''].join('\t'));
+      rows.push([c.name,x.stage===2?'A2':x.stage===1?'A1':(c.level||'A1'),rn,mt,n,fmt(x.date),WD_CN[x.date.getDay()],tn,'第'+x.idx+'堂',content(x).replace(/,/g,' '),x.rev?'中教复习':x.exam?EXAM[x.exam].name+' · '+tn+(x.exam==='final'||x.lv!=='A2'?'考':'上'):''].join('\t'));
     });
   });
   return rows.join('\n');
