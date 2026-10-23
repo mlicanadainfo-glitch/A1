@@ -357,7 +357,7 @@ function midSuggest(seq,mode,level){
 /* ---------- 假日 ---------- */
 const REGION={east:{name:'加东'},west:{name:'加西'}};
 const HOLIDAYS={
-  2026:[['2026-01-01','元旦 Jour de l\'An'],['2026-02-16','家庭日 Jour de la famille'],['2026-04-03','耶稣受难日 Vendredi saint'],['2026-05-18','爱国者日 Journée des patriotes'],['2026-06-24','魁北克国庆 Saint-Jean-Baptiste'],['2026-07-01','加拿大国庆 Fête du Canada'],['2026-09-07','劳动节 Fête du Travail'],['2026-09-30','真相与和解日 Truth and Reconciliation','west'],['2026-10-12','感恩节 Action de grâce'],['2026-11-11','国殇日 Remembrance Day','west'],['2026-12-25','圣诞节 Noël'],['2026-12-26','圣诞假 Congé de Noël'],['2026-12-28','圣诞假 Congé de Noël']],
+  2026:[['2026-01-01','元旦 Jour de l\'An'],['2026-02-16','家庭日 Jour de la famille'],['2026-04-03','耶稣受难日 Vendredi saint'],['2026-05-18','爱国者日 Journée des patriotes'],['2026-06-24','魁北克国庆 Saint-Jean-Baptiste'],['2026-07-01','加拿大国庆 Fête du Canada'],['2026-09-07','劳动节 Fête du Travail'],['2026-09-30','真相与和解日 Truth and Reconciliation','west'],['2026-10-12','感恩节 Action de grâce'],['2026-11-11','国殇日 Remembrance Day','west'],['2026-12-24','圣诞假 Congé de Noël'],['2026-12-25','圣诞节 Noël'],['2026-12-26','圣诞假 Congé de Noël'],['2026-12-28','圣诞假 Congé de Noël'],['2026-12-31','圣诞假 Congé de Noël']],
   2027:[['2027-01-01','元旦 Jour de l\'An'],['2027-02-15','家庭日 Family Day'],['2027-03-26','耶稣受难日 Vendredi saint'],['2027-05-24','维多利亚日 Fête de la Reine'],['2027-06-24','圣让-巴蒂斯特 Saint-Jean-Baptiste'],['2027-07-01','加拿大国庆 Fête du Canada'],['2027-08-02','公民日 Congé civique'],['2027-09-06','劳动节 Fête du Travail'],['2027-09-30','真相与和解日 Truth and Reconciliation','west'],['2027-10-11','感恩节 Action de grâce'],['2027-11-11','国殇日 Remembrance Day','west'],['2027-12-24','平安夜 Noël'],['2027-12-25','圣诞节 Noël']],
 };
 
@@ -374,8 +374,8 @@ function newClass(){
 const state={ holEnabled:new Set(), custom:[], classes:[], activeId:null, tab:'setup', year:2026, view:'chips' };
 Object.values(HOLIDAYS).flat().forEach(([d])=>state.holEnabled.add(d));
 const LSKEY='mli_scheduler_v1';
-const HOL_VERSION=3;                            // 每次新增预载假日就 +1
-const HOL_NEW={2:['2026-12-26','2026-12-28'],3:['2026-09-30','2026-11-11','2027-09-30','2027-11-11']};  // 各版本新增、对老用户自动开启
+const HOL_VERSION=4;                            // 每次新增预载假日就 +1
+const HOL_NEW={2:['2026-12-26','2026-12-28'],3:['2026-09-30','2026-11-11','2027-09-30','2027-11-11'],4:['2026-12-24','2026-12-31']};  // 各版本新增、对老用户自动开启
 function snapshot(){ return {v:1,holVer:HOL_VERSION,CID,activeId:state.activeId,year:state.year,holEnabled:[...state.holEnabled],custom:state.custom,classes:state.classes}; }
 function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(snapshot())); }catch(e){} }
 function migrateLeaves(c){ if(c.a0===undefined)c.a0=true; if(c.region!=='west')c.region='east'; if(c.level!=='A2'&&c.level!=='A12')c.level='A1'; c.leaves=(c.leaves||[]).map(lv=> lv.start ? {start:lv.start,end:lv.end||lv.start,scope:lv.scope||'all',kind:lv.kind||'leave'} : {start:lv.date,end:lv.date,scope:lv.scope||'all',kind:'leave'} ); return c; }
