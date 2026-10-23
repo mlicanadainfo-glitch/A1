@@ -286,8 +286,8 @@ const KIND={leave:{name:'请假',color:'#c0392b',bg:'#fdecec',border:'#e6b0b0',i
 const SCOPE={all:'全班',ZJ:'中教',WJ:'外教'};
 const calTag=(kind,scope)=> kind==='extra' ? (scope==='ZJ'?'中补':'外补') : kind==='swap' ? (scope==='ZJ'?'中调':'外调') : kind==='vacation' ? (scope==='all'?'休假':scope==='ZJ'?'中休':'外休') : (scope==='all'?'停课':scope==='ZJ'?'中假':'外假');
 
-/* 期中改为在家完成：不再占用任何一堂课，只按下列锚点算一个「建议完成日」 */
-const MID_ANCHOR={full:{type:'WJ',idx:6}, part:{type:'WJ',idx:5}};
+/* 期中改为在家完成：不占课堂。A1 期中＝中教上完第 8 堂后开始（全日制、兼读制相同） */
+const MID_ANCHOR={full:{type:'ZJ',idx:8}, part:{type:'ZJ',idx:8}};
 
 function buildSequence(mode, withA0=true, a0n=3, a0wj=false){
   const s=[]; let zj=0,wj=0;
@@ -570,7 +570,7 @@ function renderEditor(){
     </div>
     <div id="modeWarn"></div>
     ${c.level==='A12'?`<p class="note">先排 A1，A1 结课后接着排 A2（同一个班型、上课日、地区和请假设置）。A2 部分：${c.mode==='full'?'全日制 37 堂（中教 20 + 外教 13 + 期末 + 中教复习 3）':'兼读制 37 堂（中教 21 + 外教 11 + 期末 + 期末后中教复习 3 + 外教 TCF 专练 1，不排 Bilan）'}。</p>`:''}
-    <p class="note">${isA2(c)?(c.mode==='full'?'A2 全日制「中中中外外」轮流：中教 20 堂新知识 + 外教 13 堂（L1–L13，外教第 13 堂＝Bilan），共 33 堂；第 34 堂期末，接在内容课后最近的上课日，轮到谁就是谁，同天两边都能排时以中教为主；期末后中教复习 3 堂。合计 37 堂。':'A2 兼读制「中中外」轮流：中教 21 堂（Leçon 1–20 + 第 21 堂复习中19–20 + TCF）+ 外教 11 堂（课件 L1–L11，L1、L2 是开场复习），共 32 堂；接着期末（轮到谁就谁考）；期末后中教复习 3 堂，外教再上一堂 TCF 听力 + 阅读专练（全日制同一份当作业）。合计 37 堂，不排 Bilan。建议周二开班。')+'期中在家完成，建议完成日＝外教上 L7（回收中9–10）那天。':(c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补一堂中教（中17），共 25 堂内容课；第 26 堂期末，接在内容课后最近的上课日，轮到谁就是谁（同天两边都能排时以中教为主）。')+'期中改为在家完成，不占课堂，只给建议完成日。'}</p>
+    <p class="note">${isA2(c)?(c.mode==='full'?'A2 全日制「中中中外外」轮流：中教 20 堂新知识 + 外教 13 堂（L1–L13，外教第 13 堂＝Bilan），共 33 堂；第 34 堂期末，接在内容课后最近的上课日，轮到谁就是谁，同天两边都能排时以中教为主；期末后中教复习 3 堂。合计 37 堂。':'A2 兼读制「中中外」轮流：中教 21 堂（Leçon 1–20 + 第 21 堂复习中19–20 + TCF）+ 外教 11 堂（课件 L1–L11，L1、L2 是开场复习），共 32 堂；接着期末（轮到谁就谁考）；期末后中教复习 3 堂，外教再上一堂 TCF 听力 + 阅读专练（全日制同一份当作业）。合计 37 堂，不排 Bilan。建议周二开班。')+'期中在家完成，建议完成日＝外教上 L7（回收中9–10）那天。':(c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补一堂中教（中17），共 25 堂内容课；第 26 堂期末，接在内容课后最近的上课日，轮到谁就是谁（同天两边都能排时以中教为主）。')+'期中在家完成，不占课堂：中教上完第 8 堂后开始。'}</p>
 
     ${isA2(c)?'':`<label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（${c.a0n||3} 堂）</span><span class="a0hint">${c.a0!==false?'共 '+(26+(c.a0n||3))+' 堂':'仅算 A1，共 26 堂'}</span></label>
     ${c.a0!==false?`<div class="a0opts" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:6px 0 4px;font-size:13px;font-weight:600">
@@ -719,7 +719,7 @@ function renderDetail(){
     : `<div class="summary">${stat('开班',md(all.open))}${stat('结课',md(all.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',all.weeks+' 周')}</div>`;
   ST.forEach((t,i)=>{ const mm=MS[i], S=t.seq, A2s=t.lv==='A2', pre=r.combo?t.lv+' ':'';
     html+='<div class="exam-cards">';
-    if(mm.mid) html+=`<div class="ecard home"><div class="lbl">${pre}期中 · 在家完成</div><div class="d">${md(mm.mid)}</div><div class="w">${WD_CN[mm.mid.getDay()]} · 建议完成日，不占课堂</div></div>`;
+    if(mm.mid) html+=`<div class="ecard home"><div class="lbl">${pre}期中 · 在家完成${A2s?'':'（开始）'}</div><div class="d">${md(mm.mid)}</div><div class="w">${WD_CN[mm.mid.getDay()]} · ${A2s?'建议完成日':'中教第 8 堂上完后开始'}，不占课堂</div></div>`;
     ((A2s||c.mode==='full')?['bilan','final']:['final']).forEach(k=>{const cc=S.find(x=>x.exam===k); if(!cc)return;
       html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${pre}${EXAM[k].name}<span class="by">${teacherOf(cc)}考</span></div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.sno||cc.no} 次课 · ${teacherOf(cc)}第 ${cc.idx} 堂</div></div>`;});
     html+='</div>';
