@@ -286,7 +286,7 @@ const KIND={leave:{name:'请假',color:'#c0392b',bg:'#fdecec',border:'#e6b0b0',i
 const SCOPE={all:'全班',ZJ:'中教',WJ:'外教'};
 const calTag=(kind,scope)=> kind==='extra' ? (scope==='ZJ'?'中补':'外补') : kind==='swap' ? (scope==='ZJ'?'中调':'外调') : kind==='vacation' ? (scope==='all'?'休假':scope==='ZJ'?'中休':'外休') : (scope==='all'?'停课':scope==='ZJ'?'中假':'外假');
 
-/* 期中改为在家完成：不占课堂。A1 期中＝中教第 8 堂的第二天开始（不论平日或周末；全日制、兼读制相同） */
+/* 期中改为在家完成：不占课堂。A1 期中＝中教第 8 堂的第二天开始，A2 期中＝中教第 11 堂的第二天开始（不论平日或周末；全日制、兼读制相同） */
 const MID_ANCHOR={full:{type:'ZJ',idx:8}, part:{type:'ZJ',idx:8}};
 
 function buildSequence(mode, withA0=true, a0n=3, a0wj=false){
@@ -311,30 +311,32 @@ function buildSequence(mode, withA0=true, a0n=3, a0wj=false){
 }
 /* ===== A2 ===== */
 const A2_MID_DECK=7, A2_ZJ={full:20, part:21}, A2_WJ={full:13, part:11}, A2_REV=3;
-/* 外教课件：全日制 L1–L13 依序；兼读制 11 堂 L1–L11（L1、L2 是开场复习，L3 起回收中教）；兼读制中21＝复习中19–20 + TCF（C21），中22＝TCF 听力阅读专练，无 Bilan */
-const WJ_DECK={full:[1,2,3,4,5,6,7,8,9,10,11,12,13], part:[1,2,3,4,5,6,7,8,9,10,11]};
-const DECK_T={1:'Se présenter',2:'Objets et lieux',3:'Ma semaine',4:'Sorties en famille',5:'Avant et demain',6:'Récits et métiers',7:'Plus vert, plus poli',8:'Météo et sorties',9:'Embauche et magasinage',10:'Au bureau',11:'Maison et planète',12:'Santé et vacances',13:'Bilan A2'};
-const DECK_R={1:'开场复习',2:'开场复习',3:'回收中1–2',4:'回收中3–4',5:'回收中5–6',6:'回收中7–8',7:'回收中9–10',8:'回收中11–12',9:'回收中13–14',10:'回收中15',11:'回收中16–17',12:'回收中18–19',13:'Bilan 总测'};
-/* 兼读制中教 22 堂：Leçon 1–20 + 复习中19–20 + TCF（C21）+ TCF 听力阅读专练（全日制同一份当作业） */
-const PT_ZJ={21:'复习中19–20 + TCF（A2_C21）'};
+/* 外教课件（2026/10/30 新顺序，不排 Bilan）：
+   全日制 13 堂＝Reprise A1·TCF → L1–L6 → 复习 → L7–L9 → L10 → L11（平台 Leçon 1–13，1＝Reprise A1，8＝Révision）
+   兼读制 11 堂＝L1–L6 → 复习 → L7–L9 → L10+L11 合并（平台 Leçon 1–11，7＝Révision）；Reprise A1 在兼读制当作业 */
+const WJ_DECK={full:['R',1,2,3,4,5,6,'V',7,8,9,10,11], part:[1,2,3,4,5,6,'V',7,8,9,'X']};
+const DECK_T={R:'Reprise A1 · format TCF',V:'Révision',X:'Au bureau + Maison et planète',1:'Se présenter',2:'Objets et lieux',3:'Ma semaine',4:'Sorties en famille',5:'Avant et demain',6:'Récits et métiers',7:'Plus vert, plus poli',8:'Météo et sorties',9:'Embauche et magasinage',10:'Au bureau',11:'Maison et planète',12:'Santé et vacances',13:'Bilan A2'};
+const DECK_R={R:'固定课，不跟中教进度',V:'复习，不跟中教进度',X:'回收中15–17',1:'开场复习',2:'开场复习',3:'回收中1–2',4:'回收中3–4',5:'回收中5–6',6:'回收中7–8',7:'回收中9–10',8:'回收中11–12',9:'回收中13–14',10:'回收中15',11:'回收中16–17',12:'回收中18–19',13:'Bilan 总测'};
+/* 中教：全日制 20 堂（第 20 堂＝Leçon 20+21）；兼读制 21 堂（第 21 堂＝Bilan + Gérondif）；兼读制期末后外教另上 TCF 听力阅读专练（全日制当作业） */
+const PT_ZJ={21:'Bilan + Gérondif'}; const FT_ZJ={20:'Leçon 20 + 21（Bilan + Gérondif）'}; const REV_T={1:'subjonctif',2:'les noms',3:'les verbes'};
 const lessonToSess=(n,mode)=>n;
-const DECK_NEED={3:2,4:4,5:6,6:8,7:10,8:12,9:14,10:15,11:17,12:19,13:20};
+const DECK_NEED={3:2,4:4,5:6,6:8,7:10,8:12,9:14,10:15,11:17,X:17};
 function buildSequenceA2(mode){
   const s=[]; let zj=0,wj=0; const W=A2_WJ[mode]||A2_WJ.part, Z=A2_ZJ[mode]||A2_ZJ.part;
   const nz=mode==='full'?3:2, nw=mode==='full'?2:1;
   while(zj<Z||wj<W){
     for(let k=0;k<nz&&zj<Z;k++){zj++; s.push({type:'ZJ',idx:zj,exam:null,pm:mode==='part'});}
-    for(let k=0;k<nw&&wj<W;k++){wj++; const dk=WJ_DECK[mode][wj-1]; s.push({type:'WJ',idx:wj,deck:dk,exam:dk===13?'bilan':null});}
+    for(let k=0;k<nw&&wj<W;k++){wj++; const dk=WJ_DECK[mode][wj-1]; s.push({type:'WJ',idx:wj,deck:dk,exam:null});}
   }
   s.forEach((c,i)=>c.seq=i+1);
   return s;
 }
 function content(c){
-  if(c.rev) return '中教复习 '+c.rev;
+  if(c.rev) return '中教复习 '+c.rev+(REV_T[c.rev]?' · '+REV_T[c.rev]:'');
   if(c.tcf) return 'TCF 听力 + 阅读专练（外教上，期末后；全日制当作业）';
   if(c.exam==='final') return '期末考';
-  if(c.type==='WJ'&&c.deck) return 'A2_L'+c.deck+' '+DECK_T[c.deck]+'（'+DECK_R[c.deck]+'）';
-  if(c.lv==='A2'&&c.type==='ZJ'){ if(!c.pm) return 'Leçon '+c.idx; return PT_ZJ[c.idx]||('Leçon '+c.idx); }
+  if(c.type==='WJ'&&c.deck) return '外教 Leçon '+c.idx+' · '+(typeof c.deck==='number'?'A2_L'+c.deck+' ':'')+DECK_T[c.deck]+'（'+DECK_R[c.deck]+'）';
+  if(c.lv==='A2'&&c.type==='ZJ'){ if(!c.pm) return FT_ZJ[c.idx]||('Leçon '+c.idx); return PT_ZJ[c.idx]||('Leçon '+c.idx); }
   return '';
 }
 const isA2=c=>c.level==='A2';
@@ -348,9 +350,8 @@ function modeCheck(c){
 function stagesOf(c,r){ return r.combo?[{lv:'A1',seq:r.seq.filter(x=>x.stage===1)},{lv:'A2',seq:r.seq.filter(x=>x.stage===2)}]:[{lv:c.level==='A2'?'A2':'A1',seq:r.seq}]; }
 const teacherOf=c=>c.type==='WJ'?'外教':(c.type==='ZJ'?'中教':(c.wj?'外教（语音）':'A0 语音'));
 function midSuggest(seq,mode,level){
-  if(level==='A2'){ const c=seq.find(x=>x.type==='WJ'&&x.deck===A2_MID_DECK); return c?c.date:null; }
-  const a=MID_ANCHOR[mode]||MID_ANCHOR.part;
-  const c=seq.find(x=>x.type===a.type&&x.idx===a.idx);
+  const a=level==='A2'?{type:'ZJ',idx:11}:(MID_ANCHOR[mode]||MID_ANCHOR.part);
+  const c=seq.find(x=>x.type===a.type&&x.idx===a.idx&&!x.exam&&!x.rev);
   if(!c) return null;
   const d=new Date(c.date); d.setDate(d.getDate()+1); return d;
 }
@@ -570,8 +571,8 @@ function renderEditor(){
       </div>
     </div>
     <div id="modeWarn"></div>
-    ${c.level==='A12'?`<p class="note">先排 A1，A1 结课后接着排 A2（同一个班型、上课日、地区和请假设置）。A2 部分：${c.mode==='full'?'全日制 37 堂（中教 20 + 外教 13 + 期末 + 中教复习 3）':'兼读制 37 堂（中教 21 + 外教 11 + 期末 + 期末后中教复习 3 + 外教 TCF 专练 1，不排 Bilan）'}。</p>`:''}
-    <p class="note">${isA2(c)?(c.mode==='full'?'A2 全日制「中中中外外」轮流：中教 20 堂新知识 + 外教 13 堂（L1–L13，外教第 13 堂＝Bilan），共 33 堂；第 34 堂期末，接在内容课后最近的上课日，轮到谁就是谁，同天两边都能排时以中教为主；期末后中教复习 3 堂。合计 37 堂。':'A2 兼读制「中中外」轮流：中教 21 堂（Leçon 1–20 + 第 21 堂复习中19–20 + TCF）+ 外教 11 堂（课件 L1–L11，L1、L2 是开场复习），共 32 堂；接着期末（轮到谁就谁考）；期末后中教复习 3 堂，外教再上一堂 TCF 听力 + 阅读专练（全日制同一份当作业）。合计 37 堂，不排 Bilan。建议周二开班。')+'期中在家完成，建议完成日＝外教上 L7（回收中9–10）那天。':(c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补一堂中教（中17），共 25 堂内容课；第 26 堂期末，接在内容课后最近的上课日，轮到谁就是谁（同天两边都能排时以中教为主）。')+'期中在家完成，不占课堂：中教第 8 堂的第二天开始（不论平日或周末）。'}</p>
+    ${c.level==='A12'?`<p class="note">先排 A1，A1 结课后接着排 A2（同一个班型、上课日、地区和请假设置）。A2 部分：${c.mode==='full'?'全日制 37 堂（中教 20 + 外教 13 + 期末 + 中教复习 3，不排 Bilan）':'兼读制 37 堂（中教 21 + 外教 11 + 期末 + 期末后中教复习 3 + 外教 TCF 专练 1，不排 Bilan）'}。</p>`:''}
+    <p class="note">${isA2(c)?(c.mode==='full'?'A2 全日制「中中中外外」轮流：中教 20 堂（第 20 堂＝Leçon 20+21）+ 外教 13 堂（Reprise A1 → L1–L6 → 复习 → L7–L11），共 33 堂；第 34 堂期末，接在内容课后最近的上课日，轮到谁就是谁，同天两边都能排时以中教为主；期末后中教复习 3 堂（subjonctif、noms、verbes）。合计 37 堂，不排 Bilan。':'A2 兼读制「中中外」轮流：中教 21 堂（Leçon 1–20 + 第 21 堂 Bilan + Gérondif）+ 外教 11 堂（L1–L6 → 复习 → L7–L9 → L10+L11 合并；Reprise A1 当作业），共 32 堂；接着期末（轮到谁就谁考）；期末后中教复习 3 堂，外教再上一堂 TCF 听力 + 阅读专练（全日制同一份当作业）。合计 37 堂，不排 Bilan。建议周二开班。')+'期中在家完成，不占课堂：中教第 11 堂的第二天开始（不论平日或周末）。':(c.mode==='full'?'内容课：中教 15 堂新知识（硬底线）+ 外教 9 堂口语；Bilan 与期末另排两堂，接在内容课后最近的两个上课日，轮到谁就是谁，同天两边都能排时以中教为主。合计 26 堂。':'中中 + 外 ×8 轮，末补一堂中教（中17），共 25 堂内容课；第 26 堂期末，接在内容课后最近的上课日，轮到谁就是谁（同天两边都能排时以中教为主）。')+'期中在家完成，不占课堂：中教第 8 堂的第二天开始（不论平日或周末）。'}</p>
 
     ${isA2(c)?'':`<label class="a0row"><input type="checkbox" id="clsA0"${c.a0!==false?' checked':''}><span>包含 A0 语音（${c.a0n||3} 堂）</span><span class="a0hint">${c.a0!==false?'共 '+(26+(c.a0n||3))+' 堂':'仅算 A1，共 26 堂'}</span></label>
     ${c.a0!==false?`<div class="a0opts" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:6px 0 4px;font-size:13px;font-weight:600">
@@ -689,7 +690,7 @@ function chipLabel(c){return c.rev?'复'+c.rev:c.exam==='bilan'?'Bil':c.exam==='
 function issuesOf(c,r){
   let n=(r.early||[]).length+(r.lateWJ||[]).length+(r.lateWJ2||[]).length;
   stagesOf(c,r).forEach(st=>{ const z=st.seq.filter(x=>x.type==='ZJ').map(x=>+x.date); if(!z.length) return; const f=Math.min(...z);
-    n+=st.seq.filter(x=>x.type==='WJ'&&!x.tcf&&!(st.lv==='A2'&&(x.deck===1||x.deck===2))&&+x.date<f).length; });
+    n+=st.seq.filter(x=>x.type==='WJ'&&!x.tcf&&!(st.lv==='A2'&&!DECK_NEED[x.deck])&&+x.date<f).length; });
   return n;
 }
 function startAdvice(c){
@@ -720,13 +721,13 @@ function renderDetail(){
     : `<div class="summary">${stat('开班',md(all.open))}${stat('结课',md(all.close))}${stat('总课时',seq.length+' 堂')}${stat('跨越周数',all.weeks+' 周')}</div>`;
   ST.forEach((t,i)=>{ const mm=MS[i], S=t.seq, A2s=t.lv==='A2', pre=r.combo?t.lv+' ':'';
     html+='<div class="exam-cards">';
-    if(mm.mid) html+=`<div class="ecard home"><div class="lbl">${pre}期中 · 在家完成${A2s?'':'（开始）'}</div><div class="d">${md(mm.mid)}</div><div class="w">${WD_CN[mm.mid.getDay()]} · ${A2s?'建议完成日':'中教第 8 堂的第二天开始'}，不占课堂</div></div>`;
+    if(mm.mid) html+=`<div class="ecard home"><div class="lbl">${pre}期中（居家）起</div><div class="d">${md(mm.mid)}</div><div class="w">${WD_CN[mm.mid.getDay()]} · ${A2s?'中教第 11 堂的第二天开始':'中教第 8 堂的第二天开始'}，不占课堂</div></div>`;
     ((A2s||c.mode==='full')?['bilan','final']:['final']).forEach(k=>{const cc=S.find(x=>x.exam===k); if(!cc)return;
       html+=`<div class="ecard" style="background:${EXAM[k].color}"><div class="lbl">${pre}${EXAM[k].name}<span class="by">${teacherOf(cc)}考</span></div><div class="d">${md(cc.date)}</div><div class="w">${WD_CN[cc.date.getDay()]} · 第 ${cc.sno||cc.no} 次课 · ${teacherOf(cc)}第 ${cc.idx} 堂</div></div>`;});
     html+='</div>';
     const zc=S.filter(x=>x.type==='ZJ'), wc=S.filter(x=>x.type==='WJ');
     if(A2s){ const zn2=zc.filter(x=>!x.exam&&!x.rev).length, wn2=wc.filter(x=>x.exam!=='final'&&!x.tcf).length, rn2=zc.filter(x=>x.rev).length, tn2=wc.filter(x=>x.tcf).length;
-      html+=`<div class="tally">A2 · 中教 <b>${zn2}</b> 堂 · 外教 <b>${wn2}</b> 堂${c.mode==="full"?"（含 Bilan）":""}· 期末 <b>1</b> 堂 · 中教复习 <b>${rn2}</b> 堂${tn2?` · 外教 TCF 专练 <b>${tn2}</b> 堂`:''} · 合计 <b>${S.length}</b> 堂</div>`; }
+      html+=`<div class="tally">A2 · 中教 <b>${zn2}</b> 堂 · 外教 <b>${wn2}</b> 堂· 期末 <b>1</b> 堂 · 中教复习 <b>${rn2}</b> 堂${tn2?` · 外教 TCF 专练 <b>${tn2}</b> 堂`:''} · 合计 <b>${S.length}</b> 堂</div>`; }
     else { const zn=zc.filter(x=>!x.exam).length, wn=wc.filter(x=>!x.exam).length;
       html+=`<div class="tally">${pre}内容课时：中教新知识 <b>${zn}</b> 堂 · 外教口语 <b>${wn}</b> 堂 · 考试占用 <b>${zc.length+wc.length-zn-wn}</b> 堂 · 合计 <b>${S.length}</b> 堂</div>`; }
   });
@@ -751,8 +752,8 @@ function renderDetail(){
       sug+=`<li><b>中教补课</b>：在 ${free.map(ds=>md(parse(ds))+' '+WD_CN[parse(ds).getDay()]).join('、')} 加开中教，追上进度。 <button class="btn ghost sm" data-fix="${FIX.length-1}">一键加补课</button></li>`; }
     FIX.push(()=>{const xd=fmt(x.date); c.leaves.push({start:xd,end:xd,scope:'WJ',kind:'swap'});});
     sug+=`<li><b>外教顺延</b>：${md(x.date)} 这堂外教不排进度（停课或上 TCF 练习），后面外教课往后挪一堂，结课可能晚一点。 <button class="btn ghost sm" data-fix="${FIX.length-1}">一键顺延</button></li>`;
-    sug+=`<li><b>不改日历</b>：外教这堂先上已学过的内容（例如前一份课件的延伸活动或 TCF 练习），L${x.deck} 留到中教上完 Leçon ${DECK_NEED[x.deck]} 之后。</li>`;
-    html+=`<div class="warnbar" style="background:#fdecec;border-color:#e6b0b0;color:#8f2424">⚠ <b>外教跑在中教前面 ${r.early.length} 处</b>（节奏条上红框标示）：${r.early.map(({x,z})=>`外教 ${md(x.date)} 要用 L${x.deck}，但 Leçon ${DECK_NEED[x.deck]} 在 ${md(z.date)} 才上`).join('；')}。
+    sug+=`<li><b>不改日历</b>：外教这堂先上已学过的内容（例如前一份课件的延伸活动或 TCF 练习），${x.deck==='X'?'L10+L11':'L'+x.deck} 留到中教上完 Leçon ${DECK_NEED[x.deck]} 之后。</li>`;
+    html+=`<div class="warnbar" style="background:#fdecec;border-color:#e6b0b0;color:#8f2424">⚠ <b>外教跑在中教前面 ${r.early.length} 处</b>（节奏条上红框标示）：${r.early.map(({x,z})=>`外教 ${md(x.date)} 要用 ${x.deck==='X'?'L10+L11':'L'+x.deck}，但 Leçon ${DECK_NEED[x.deck]} 在 ${md(z.date)} 才上`).join('；')}。
       <div style="margin-top:6px">原因：${causes.length?`中教遇到 ${causes.join('、')} 停课，进度慢了。`:'不是假日造成的，是开班日和每周上课日的排法让外教走得比中教快，可以参考上方「开班日建议」。'}</div>
       <div style="margin-top:6px">建议（先处理第一处 ${md(x.date)}，改完后面会自动重算）：</div><ul style="margin:4px 0 0 18px;padding:0;line-height:1.8">${sug}</ul></div>`;
   }
@@ -849,7 +850,7 @@ function renderCalendar(seq){
 /* ---------- 渲染：汇总总览 ---------- */
 function renderOverview(){
   const t=document.getElementById('ovTable');
-  let h='<thead><tr><th>班级</th><th>级别</th><th>地区</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中(在家)</th><th>Bilan</th><th>期末</th><th>结课</th><th>周数</th></tr></thead><tbody>';
+  let h='<thead><tr><th>班级</th><th>级别</th><th>地区</th><th>班型</th><th>开班</th><th>A0 完成</th><th>期中（居家）起</th><th>Bilan</th><th>期末</th><th>结课</th><th>周数</th></tr></thead><tbody>';
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
     const rn=REGION[c.region||'east'].name;
@@ -865,7 +866,7 @@ const esc=s=>String(s).replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 
 /* ---------- 复制 / 导出 ---------- */
 function ovTSV(){
-  const head=['班级','级别','地区','班型','开班','A0完成','期中(在家·建议)','Bilan','期末','结课','周数'];
+  const head=['班级','级别','地区','班型','开班','A0完成','期中（居家）起','Bilan','期末','结课','周数'];
   const rows=[head.join('\t')];
   state.classes.forEach(c=>{
     const r=computeSchedule(c); const mt=c.mode==='full'?'全日制':'兼读制';
