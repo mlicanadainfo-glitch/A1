@@ -331,11 +331,15 @@ function buildSequenceA2(mode){
   s.forEach((c,i)=>c.seq=i+1);
   return s;
 }
+/* A1 课程内容（依 A0–A1 大纲，2026/11 版：外教第 1 堂改为语音复习，原最后一堂口语课删除） */
+const A1_ZJ_T={full:{"1": "Se présenter", "2": "Les Chiffres et Les Heures", "3": "Les Nationalités & Les Chiffres · Objets de classe + Impératif", "4": "La famille et Présenter", "5": "Les questions", "6": "Demander Son Chemin & Les directions", "7": "Activités quotidiennes", "8": "Permission", "9": "Verbes pronominaux", "10": "Déplacements & Négation & Articles partitifs", "11": "Loisirs & Passions", "12": "La santé & La météo", "13": "Les Vêtements", "14": "Adjectifs & Comparatifs", "15": "Les Fêtes + La Nourriture"},part:{"1": "Se présenter", "2": "Les Chiffres et Les Heures", "3": "Les Nationalités & Les Chiffres · Objets de classe + Impératif", "4": "La famille et Présenter", "5": "Les questions", "6": "Demander son chemin & les directions", "7": "Activités quotidiennes", "8": "Permission", "9": "Verbes pronominaux", "10": "Déplacements & Négation & Articles partitifs", "11": "Loisirs & Passions", "12": "COD & COI & Y", "13": "La santé & Chez le Médecin", "14": "La Météo & Les Vêtements", "15": "Adjectifs & Comparatifs", "16": "Fêtes", "17": "Nourriture"}};
+const A1_WJ_T={full:{"1": "Révision phonétique — les 36 sons", "2": "Se présenter", "3": "Nombres & heure", "4": "La classe & la famille", "5": "Questions & le chemin", "6": "Quotidien & routine", "7": "Bilan — Oral", "8": "Déplacements & loisirs", "9": "Chez le médecin, la météo"},part:{"1": "Révision phonétique — les 36 sons", "2": "Se présenter, les nombres & l'heure", "3": "En classe, la famille & les descriptions", "4": "Poser des questions & demander son chemin", "5": "Les activités & la permission", "6": "Ma routine, mes déplacements & mes loisirs", "7": "Chez le médecin, la météo & les vêtements"}};
 function content(c){
   if(c.rev) return '中教复习 '+c.rev+(REV_T[c.rev]?' · '+REV_T[c.rev]:'');
   if(c.tcf) return 'TCF 听力 + 阅读专练（外教上，期末后；全日制当作业）';
   if(c.exam==='final') return '期末考';
   if(c.type==='WJ'&&c.deck) return '外教 Leçon '+c.idx+' · '+(typeof c.deck==='number'?'A2_L'+c.deck+' ':'')+DECK_T[c.deck]+'（'+DECK_R[c.deck]+'）';
+  if(c.lv==='A1'&&!c.exam&&(c.type==='ZJ'||c.type==='WJ')){ const T=(c.type==='ZJ'?A1_ZJ_T:A1_WJ_T)[c.md==='full'?'full':'part']; const t=T&&T[c.idx]; if(t) return (c.type==='ZJ'?'中教 Leçon ':'外教 Leçon ')+c.idx+' · '+t; }
   if(c.lv==='A2'&&c.type==='ZJ'){ if(!c.pm) return FT_ZJ[c.idx]||('Leçon '+c.idx); return PT_ZJ[c.idx]||('Leçon '+c.idx); }
   return '';
 }
@@ -424,7 +428,7 @@ function computeSchedule(cls){
   const need = (!A2&&cls.a0!==false) ? ['A0','ZJ','WJ'] : ['ZJ','WJ'];
   for(const t of need) if(cls.days[t].length===0) return {error:`${TYPES[t].name} 无上课日`};
   const seq=A2?buildSequenceA2(cls.mode):buildSequence(cls.mode, cls.a0!==false, cls.a0n||3, (cls.a0n||3)===3&&!!cls.a0wj);
-  seq.forEach(c=>c.lv=A2?'A2':'A1');
+  seq.forEach(c=>{c.lv=A2?'A2':'A1'; c.md=cls.mode;});
   const placed={}; // 每类各自计数，中教/外教可同日不冲突
   function place(list, from){
     let cursor=new Date(from);
